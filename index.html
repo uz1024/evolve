@@ -2,22 +2,20 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BioGenesis 2.0 — Открытая Эволюция Искусственной Жизни</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>BioGenesis 2.5 — Открытая Эволюция Искусственной Жизни</title>
   <style>
     :root {
-      --bg-deep: #040811;
-      --bg-panel: rgba(10, 17, 32, 0.88);
-      --bg-card: rgba(17, 28, 52, 0.78);
-      --border: rgba(88, 166, 255, 0.22);
-      --border-bright: rgba(56, 189, 248, 0.55);
-      --text-main: #e2e8f0;
+      --bg-deep: #030712;
+      --bg-panel: rgba(9, 15, 29, 0.88);
+      --bg-card: rgba(17, 27, 48, 0.78);
+      --border: rgba(56, 189, 248, 0.24);
+      --border-bright: rgba(56, 189, 248, 0.65);
+      --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       --accent: #38bdf8;
       --accent-green: #22c55e;
       --accent-red: #f43f5e;
-      --accent-amber: #facc15;
-      --accent-purple: #a855f7;
     }
 
     * {
@@ -27,318 +25,330 @@
       user-select: none;
     }
 
-    body, html {
-      width: 100%;
-      height: 100%;
+    html, body {
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
-      background-color: var(--bg-deep);
+      background: var(--bg-deep);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-      font-size: 13px;
+      font-size: 12px;
     }
 
+    /* Полноэкранный холст симуляции */
     #worldCanvas {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
       display: block;
       cursor: grab;
+      z-index: 1;
     }
     #worldCanvas:active {
       cursor: grabbing;
     }
 
-    /* Top HUD */
-    .top-bar {
+    /* Жесткий каркас интерфейса без вылетов за экран */
+    .ui-root {
       position: fixed;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      min-height: 52px;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    /* Верхняя панель */
+    .top-bar {
+      pointer-events: auto;
+      flex-shrink: 0;
+      width: 100%;
       background: var(--bg-panel);
       backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
+      padding: 6px 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 14px;
-      gap: 12px;
-      z-index: 20;
+      gap: 8px;
       flex-wrap: wrap;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      white-space: nowrap;
     }
     .brand-dot {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: radial-gradient(circle, #4ade80 0%, #0ea5e9 70%, transparent 100%);
-      box-shadow: 0 0 12px #38bdf8;
+      background: #4ade80;
+      box-shadow: 0 0 10px #38bdf8;
     }
     .brand-title {
       font-weight: 700;
-      font-size: 14px;
-      letter-spacing: 0.3px;
-      color: #f8fafc;
+      font-size: 13px;
+      color: #fff;
     }
-    .brand-sub {
-      font-size: 11px;
+    .brand-badge {
+      font-size: 10px;
       color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
-      padding: 2px 7px;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      padding: 1px 6px;
       border-radius: 999px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
     }
 
-    .controls-group {
+    .toolbar-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
 
     button, select {
-      background: rgba(30, 41, 59, 0.85);
+      background: rgba(30, 41, 59, 0.9);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.14s ease;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
+      white-space: nowrap;
     }
     button:hover, select:hover {
       border-color: var(--border-bright);
-      background: rgba(51, 65, 85, 0.9);
+      background: rgba(51, 65, 85, 0.95);
     }
     button.active {
-      background: rgba(14, 165, 233, 0.25);
+      background: rgba(14, 165, 233, 0.28);
       border-color: #38bdf8;
       color: #7dd3fc;
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
     }
-    button.btn-success {
+    button.btn-green {
       background: rgba(34, 197, 94, 0.2);
-      border-color: rgba(34, 197, 94, 0.5);
+      border-color: rgba(34, 197, 94, 0.55);
       color: #86efac;
     }
-    button.btn-warn {
+    button.btn-amber {
       background: rgba(245, 158, 11, 0.2);
-      border-color: rgba(245, 158, 11, 0.5);
+      border-color: rgba(245, 158, 11, 0.55);
       color: #fde047;
     }
 
-    .stats-strip {
+    .stats-row {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .stat-item {
+    .stat-pill {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      line-height: 1.15;
     }
-    .stat-label {
-      font-size: 10px;
+    .stat-pill .lbl {
+      font-size: 9px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       color: var(--text-muted);
     }
-    .stat-val {
-      font-size: 13px;
+    .stat-pill .val {
+      font-size: 12px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      color: #f8fafc;
-    }
-    .stat-val.highlight {
-      color: #4ade80;
-    }
-    .stat-val.cyan {
-      color: #38bdf8;
     }
 
-    /* Left Panel: Laws & Analytics */
-    .left-panel {
-      position: fixed;
-      top: 72px;
-      left: 10px;
-      width: 320px;
-      max-height: calc(100vh - 84px);
+    /* Рабочая область для боковых панелей (автоматически сжимается по высоте экрана) */
+    .workspace {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .side-panel {
+      pointer-events: auto;
+      width: 300px;
+      max-width: 44vw;
+      max-height: 100%;
       overflow-y: auto;
+      overflow-x: hidden;
       background: var(--bg-panel);
       backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      z-index: 15;
+      border-radius: 10px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      gap: 8px;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55);
+      transition: opacity 0.18s ease, transform 0.18s ease;
     }
 
-    /* Right Panel: Organism Inspector */
-    .right-panel {
-      position: fixed;
-      top: 72px;
-      right: 10px;
-      width: 340px;
-      max-height: calc(100vh - 84px);
-      overflow-y: auto;
-      background: var(--bg-panel);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      z-index: 15;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    .side-panel.collapsed {
+      display: none !important;
     }
 
-    .panel-header {
+    /* Тонкий аккуратный скроллбар внутри панелей */
+    .side-panel::-webkit-scrollbar,
+    .gene-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .side-panel::-webkit-scrollbar-thumb,
+    .gene-list::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+
+    .panel-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      font-size: 11px;
       font-weight: 700;
-      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.4px;
       color: var(--accent);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      padding-bottom: 5px;
     }
 
-    .law-toggle {
+    .law-item {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 7px;
       background: var(--bg-card);
       border: 1px solid rgba(148, 163, 184, 0.14);
-      padding: 7px 9px;
-      border-radius: 8px;
+      padding: 6px 8px;
+      border-radius: 7px;
       cursor: pointer;
-      transition: border-color 0.15s;
     }
-    .law-toggle:hover {
+    .law-item:hover {
       border-color: var(--border-bright);
     }
-    .law-toggle input {
+    .law-item input {
       margin-top: 2px;
-      accent-color: #38bdf8;
+      accent-color: var(--accent);
       cursor: pointer;
     }
-    .law-title {
+    .law-name {
       font-weight: 600;
-      font-size: 12px;
-      color: #f1f5f9;
-    }
-    .law-desc {
       font-size: 11px;
+      color: #f8fafc;
+    }
+    .law-hint {
+      font-size: 10px;
       color: var(--text-muted);
-      line-height: 1.3;
+      line-height: 1.25;
       margin-top: 2px;
     }
 
-    .slider-row {
+    .slider-block {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
-    .slider-top {
+    .slider-head {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
     }
     input[type="range"] {
       width: 100%;
+      height: 5px;
       accent-color: var(--accent);
       cursor: pointer;
     }
 
-    .chart-box {
-      background: rgba(4, 8, 17, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 8px;
-      padding: 8px;
+    .chart-wrap {
+      background: rgba(3, 7, 18, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 7px;
+      padding: 6px;
     }
-    .chart-legend {
+    .chart-head {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
+      font-size: 10px;
+      margin-bottom: 3px;
     }
 
     .legend-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      font-size: 11px;
+      gap: 4px;
+      font-size: 10px;
     }
-    .legend-item {
+    .legend-cell {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      background: rgba(15, 23, 42, 0.65);
+      padding: 3px 6px;
+      border-radius: 5px;
       color: #cbd5e1;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 4px 7px;
-      border-radius: 6px;
     }
     .dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
     }
 
-    /* Inspector details */
-    .inspector-grid {
+    /* Инспектор справа */
+    .insp-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 5px;
     }
-    .info-card {
+    .insp-card {
       background: var(--bg-card);
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      border-radius: 7px;
-      padding: 6px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 6px;
+      padding: 5px 7px;
     }
-    .info-card .k {
-      font-size: 10px;
+    .insp-card .k {
+      font-size: 9px;
       color: var(--text-muted);
     }
-    .info-card .v {
-      font-size: 13px;
+    .insp-card .v {
+      font-size: 12px;
       font-weight: 700;
-      margin-top: 2px;
+      margin-top: 1px;
       font-variant-numeric: tabular-nums;
     }
 
-    .progress-bar {
+    .onto-bar {
       width: 100%;
-      height: 7px;
+      height: 6px;
       background: rgba(15, 23, 42, 0.9);
       border-radius: 999px;
       overflow: hidden;
-      margin-top: 4px;
+      margin-top: 3px;
       border: 1px solid rgba(148, 163, 184, 0.2);
     }
-    .progress-fill {
+    .onto-fill {
       height: 100%;
       background: linear-gradient(90deg, #22c55e, #38bdf8);
       transition: width 0.15s ease;
@@ -346,98 +356,98 @@
 
     #blueprintCanvas {
       width: 100%;
-      height: 175px;
-      background: radial-gradient(circle at center, rgba(15, 29, 58, 0.9) 0%, rgba(4, 8, 17, 0.95) 100%);
+      height: 145px;
+      background: radial-gradient(circle at center, rgba(16, 32, 64, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%);
       border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 8px;
+      border-radius: 7px;
       display: block;
     }
 
     .gene-list {
-      max-height: 150px;
+      max-height: 115px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding-right: 2px;
+      gap: 3px;
+      padding-right: 3px;
     }
-    .gene-row {
+    .gene-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.78);
       border: 1px solid rgba(148, 163, 184, 0.12);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 11px;
-    }
-    .badge-sym {
-      background: rgba(168, 85, 247, 0.22);
-      color: #d8b4fe;
-      border: 1px solid rgba(168, 85, 247, 0.45);
-      padding: 1px 5px;
-      border-radius: 4px;
+      border-radius: 5px;
+      padding: 3px 6px;
       font-size: 10px;
+    }
+    .sym-tag {
+      background: rgba(168, 85, 247, 0.24);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      padding: 0 4px;
+      border-radius: 4px;
+      font-size: 9px;
       font-weight: 700;
     }
 
-    /* Modal */
-    .modal-backdrop {
+    /* Нижняя строка подсказки */
+    .bottom-bar {
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .bottom-pill {
+      pointer-events: auto;
+      background: rgba(9, 15, 29, 0.82);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Модальное окно ДНК */
+    .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(2, 6, 23, 0.78);
+      background: rgba(2, 6, 23, 0.8);
       backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 50;
+      padding: 12px;
     }
-    .modal-backdrop.open {
+    .modal-overlay.open {
       display: flex;
     }
-    .modal-box {
-      width: min(520px, 92vw);
+    .modal-card {
+      width: min(500px, 94vw);
       background: #0f172a;
       border: 1px solid var(--border-bright);
-      border-radius: 12px;
-      padding: 16px;
+      border-radius: 10px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      gap: 8px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
     }
-    .modal-box textarea {
+    .modal-card textarea {
       width: 100%;
-      height: 180px;
+      height: 160px;
       background: #020617;
       color: #38bdf8;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 6px;
+      padding: 8px;
       font-family: monospace;
-      font-size: 12px;
-      resize: vertical;
-      user-select: text;
-    }
-
-    .hint-pill {
-      position: fixed;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(10, 17, 32, 0.82);
-      border: 1px solid var(--border);
-      padding: 5px 14px;
-      border-radius: 999px;
       font-size: 11px;
-      color: var(--text-muted);
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    @media (max-width: 960px) {
-      .left-panel { display: none; }
-      .right-panel { width: 290px; }
+      user-select: text;
     }
   </style>
 </head>
@@ -445,280 +455,297 @@
 
   <canvas id="worldCanvas"></canvas>
 
-  <!-- Top Navigation & Telemetry -->
-  <header class="top-bar">
-    <div class="brand">
-      <div class="brand-dot"></div>
-      <span class="brand-title">BioGenesis 2.0</span>
-      <span class="brand-sub">Открытая Эволюция</span>
-    </div>
-
-    <div class="controls-group">
-      <button id="btnPlayPause" class="active">⏸ Пауза</button>
-      <button id="btnWarp1" class="active" data-warp="1">1x</button>
-      <button id="btnWarp5" data-warp="5">⚡ 5x</button>
-      <button id="btnWarp15" data-warp="15">🚀 15x</button>
-      <button id="btnWarp35" data-warp="35">🔥 35x Варп</button>
-
-      <select id="presetSelect" title="Выбрать стартовый сценарий">
-        <option value="primordial">🌱 Первичный бульон (из 1 зиготы)</option>
-        <option value="cambrian" selected>🦑 Кембрийский взрыв (симметрия + ткани)</option>
-        <option value="armsrace">⚔️ Гонка вооружений (гиганты и хищники)</option>
-      </select>
-      <button id="btnReset">🔄 Перезапуск</button>
-    </div>
-
-    <div class="stats-strip">
-      <div class="stat-item">
-        <span class="stat-label">Организмы</span>
-        <span class="stat-val" id="statOrgs">0</span>
+  <div class="ui-root">
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ УПРАВЛЕНИЯ И СТАТИСТИКИ -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <span class="brand-title">BioGenesis 2.5</span>
+        <span class="brand-badge">Живая динамика + Открытая эволюция</span>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">Живых клеток</span>
-        <span class="stat-val" id="statCells">0</span>
+
+      <div class="toolbar-group">
+        <button id="btnToggleLeft" class="active" title="Скрыть/показать левую панель">◀ Законы</button>
+        <button id="btnPlay" class="active">⏸ Пауза</button>
+        <button class="warp-btn active" data-warp="1">1x</button>
+        <button class="warp-btn" data-warp="5">⚡ 5x</button>
+        <button class="warp-btn" data-warp="15">🚀 15x</button>
+        <button class="warp-btn" data-warp="35">🔥 35x</button>
+
+        <select id="scenarioSelect">
+          <option value="primordial">🌱 Первичный бульон (из 1–2 клеток)</option>
+          <option value="cambrian" selected>🦑 Кембрийский взрыв (активная экосистема)</option>
+          <option value="giants">🐋 Эпоха левиафанов (борьба гигантов)</option>
+        </select>
+        <button id="btnReset">🔄 Сброс</button>
       </div>
-      <div class="stat-item">
-        <span class="stat-label">Сред. / Макс. клеток</span>
-        <span class="stat-val highlight" id="statComplexity">1.0 / 1</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Макс. поколение</span>
-        <span class="stat-val cyan" id="statGen">1</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Сезон света</span>
-        <span class="stat-val" id="statSeason">Лето 100%</span>
-      </div>
-      <button id="btnDownload" class="btn-success" title="Скачать этот файл index.html для GitHub Pages">💾 Скачать index.html</button>
-    </div>
-  </header>
 
-  <!-- Left Panel: 4 Honest Physical Laws & Complexity Graph -->
-  <aside class="left-panel">
-    <div class="panel-header">
-      <span>⚖️ Честные законы физики (Ядро v2.0)</span>
-    </div>
-
-    <label class="law-toggle">
-      <input type="checkbox" id="lawOntogenesis" checked />
-      <div>
-        <div class="law-title">1. Онтогенез (Рост из 1 зиготы)</div>
-        <div class="law-desc">Любой вид рождается с 1 клетки за фиксированную цену (75 ед.) и достраивает тело по мере питания.</div>
-      </div>
-    </label>
-
-    <label class="law-toggle">
-      <input type="checkbox" id="lawTriangulation" checked />
-      <div>
-        <div class="law-title">2. Триангуляция и защита тканей</div>
-        <div class="law-desc">Соседние клетки сшиваются в жесткие треугольные фермы, экранируя внутренние органы от укусов.</div>
-      </div>
-    </label>
-
-    <label class="law-toggle">
-      <input type="checkbox" id="lawSymmetry" checked />
-      <div>
-        <div class="law-title">3. Билатеральная симметрия ДНК</div>
-        <div class="law-desc">Ген с флагом SYM создает зеркальную пару конечностей/глаз, сохраняя прямую линию тяги.</div>
-      </div>
-    </label>
-
-    <label class="law-toggle">
-      <input type="checkbox" id="lawTorque" checked />
-      <div>
-        <div class="law-title">4. Крутящий момент (τ = r × F) и таран</div>
-        <div class="law-desc">Нет глобального руля: поворот зависит от плеча рычага мышц и локальных сигналов от сенсоров.</div>
-      </div>
-    </label>
-
-    <div class="panel-header" style="margin-top:4px;">
-      <span>📈 Динамика сложности (Клеток в теле)</span>
-    </div>
-    <div class="chart-box">
-      <div class="chart-legend">
-        <span style="color:#38bdf8;">━ Средний размер</span>
-        <span style="color:#4ade80;">━ Рекорд клеток</span>
-      </div>
-      <canvas id="complexityChart" width="276" height="90"></canvas>
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-top">
-        <span>Интенсивность солнечного света</span>
-        <span id="valSun">1.15x</span>
-      </div>
-      <input type="range" id="sliderSun" min="0.4" max="2.2" step="0.05" value="1.15" />
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-top">
-        <span>Шанс структурной дупликации гена</span>
-        <span id="valDup">22%</span>
-      </div>
-      <input type="range" id="sliderDup" min="2" max="50" step="1" value="22" />
-    </div>
-
-    <div class="panel-header" style="margin-top:4px;">
-      <span>🧬 Специализации клеток</span>
-    </div>
-    <div class="legend-grid">
-      <div class="legend-item"><span class="dot" style="background:#22c55e;box-shadow:0 0 6px #22c55e"></span>Хлоропласт (Свет)</div>
-      <div class="legend-item"><span class="dot" style="background:#f43f5e;box-shadow:0 0 6px #f43f5e"></span>Фагоцит (Хищник)</div>
-      <div class="legend-item"><span class="dot" style="background:#38bdf8;box-shadow:0 0 6px #38bdf8"></span>Миоцит (Тяга)</div>
-      <div class="legend-item"><span class="dot" style="background:#facc15;box-shadow:0 0 6px #facc15"></span>Сенсор (Зрение)</div>
-      <div class="legend-item"><span class="dot" style="background:#a855f7;box-shadow:0 0 6px #a855f7"></span>Нейрон (Сигналы)</div>
-      <div class="legend-item"><span class="dot" style="background:#e2e8f0;box-shadow:0 0 6px #e2e8f0"></span>Хитин (Панцирь)</div>
-    </div>
-  </aside>
-
-  <!-- Right Panel: Organism & Morphogenesis Inspector -->
-  <aside class="right-panel">
-    <div class="panel-header">
-      <span>🔬 Инспектор морфогенеза и ДНК</span>
-      <button id="btnBestOrg" style="padding:2px 7px;font-size:11px;">🏆 Найти гиганта</button>
-    </div>
-
-    <div id="inspectorEmpty" style="color:var(--text-muted);font-size:12px;padding:12px 4px;text-align:center;">
-      Кликните по любому организму в океане или нажмите <b>«🏆 Найти гиганта»</b> для рентгена его тканей и ДНК.
-    </div>
-
-    <div id="inspectorContent" style="display:none;flex-direction:column;gap:9px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <span style="font-weight:700;color:#fff;" id="inspTitle">Вид #102</span>
-          <span style="font-size:11px;color:var(--text-muted);margin-left:6px;" id="inspGen">Пок. 1</span>
+      <div class="stats-row">
+        <div class="stat-pill">
+          <span class="lbl">Организмы</span>
+          <span class="val" id="stOrgs">0</span>
         </div>
-        <button id="btnFollow" style="padding:3px 8px;font-size:11px;">🎥 Следить</button>
-      </div>
-
-      <div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;">
-          <span style="color:var(--text-muted);">Онтогенез (выросло клеток тела):</span>
-          <span style="font-weight:700;color:#4ade80;" id="inspOntoText">1 / 1</span>
+        <div class="stat-pill">
+          <span class="lbl">Клетки</span>
+          <span class="val" id="stCells">0</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="inspOntoBar" style="width:100%;"></div>
+        <div class="stat-pill">
+          <span class="lbl">Ср. / Макс. клеток</span>
+          <span class="val" style="color:#4ade80;" id="stComplex">1.0 / 1</span>
+        </div>
+        <div class="stat-pill">
+          <span class="lbl">Поколение</span>
+          <span class="val" style="color:#38bdf8;" id="stGen">1</span>
+        </div>
+        <div class="stat-pill">
+          <span class="lbl">Сезон</span>
+          <span class="val" id="stSeason">☀️ 100%</span>
         </div>
       </div>
 
-      <div class="inspector-grid">
-        <div class="info-card">
-          <div class="k">Энергия / Порог зиготы</div>
-          <div class="v" id="inspEnergy">0 / 75</div>
-        </div>
-        <div class="info-card">
-          <div class="k">Масса / Момент инерции</div>
-          <div class="v" id="inspMass">1.0 / 10</div>
-        </div>
-        <div class="info-card">
-          <div class="k">Триангулировано связей</div>
-          <div class="v" id="inspLinks" style="color:#38bdf8;">0 пружин</div>
-        </div>
-        <div class="info-card">
-          <div class="k">Добыто еды / Укусов</div>
-          <div class="v" id="inspKills" style="color:#f43f5e;">0</div>
-        </div>
+      <div class="toolbar-group">
+        <button id="btnCleanUI" title="Скрыть все боковые окна (клавиша H)">👁 Экран</button>
+        <button id="btnDownload" class="btn-green" title="Скачать готовый файл index.html">💾 Скачать</button>
+        <button id="btnToggleRight" class="active" title="Скрыть/показать инспектор ДНК">Инспектор ▶</button>
       </div>
+    </header>
 
-      <div style="font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between;">
-        <span>Граф тела (сплошные — дерево, пунктир — триангуляция):</span>
-      </div>
-      <canvas id="blueprintCanvas" width="314" height="175"></canvas>
+    <!-- ЦЕНТРАЛЬНАЯ ОБЛАСТЬ С БОКОВЫМИ СКРЫВАЕМЫМИ ПАНЕЛЯМИ -->
+    <div class="workspace">
+      <!-- ЛЕВАЯ ПАНЕЛЬ: ЗАКОНЫ СЛОЖНОСТИ И ГРАФИК -->
+      <aside class="side-panel" id="leftPanel">
+        <div class="panel-title">
+          <span>⚖️ Преимущества многоклеточности</span>
+          <button id="btnCloseLeft" style="padding:1px 5px;font-size:10px;">✕</button>
+        </div>
 
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">
-        <button id="btnClone" style="flex:1;">🧬 Клон</button>
-        <button id="btnAddGene" class="btn-warn" style="flex:1;">➕ +Ген (Мутация)</button>
-        <button id="btnDnaModal" style="flex:1;">📋 JSON ДНК</button>
-      </div>
+        <label class="law-item">
+          <input type="checkbox" id="chkKleiber" checked />
+          <div>
+            <div class="law-name">1. Закон Клейбера (M^0.72) + Онтогенез</div>
+            <div class="law-hint">Метаболизм и цена деления растут сублинейно; рождение резвой личинкой с достройкой тела на ходу.</div>
+          </div>
+        </label>
 
-      <div style="font-size:11px;color:var(--text-muted);">Геном (<span id="inspGeneCount">1</span> генов → <span id="inspBlueprintCount">1</span> клеток в плане):</div>
-      <div class="gene-list" id="geneList"></div>
+        <label class="law-item">
+          <input type="checkbox" id="chkTriangulation" checked />
+          <div>
+            <div class="law-name">2. Триангуляция и тканевый щит</div>
+            <div class="law-hint">Соседние клетки сшиваются в упругую сеть, защищая внутренние органы от укусов на 75%.</div>
+          </div>
+        </label>
+
+        <label class="law-item">
+          <input type="checkbox" id="chkSymmetry" checked />
+          <div>
+            <div class="law-name">3. Билатеральная симметрия (SYM ×2)</div>
+            <div class="law-hint">Парные плавники и глаза дают гидродинамический бонус к скорости и обтекаемости.</div>
+          </div>
+        </label>
+
+        <label class="law-item">
+          <input type="checkbox" id="chkMomentum" checked />
+          <div>
+            <div class="law-name">4. Импульсный таран и нейро-синергия</div>
+            <div class="law-hint">Крупные хищники пробивают броню за счет массы (p = m·v), а сеть нейронов увеличивает обзор.</div>
+          </div>
+        </label>
+
+        <div class="panel-title" style="margin-top:2px;">
+          <span>📈 Рост сложности (Клеток в теле)</span>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-head">
+            <span style="color:#38bdf8;">━ Средний размер</span>
+            <span style="color:#4ade80;">━ Максимум клеток</span>
+          </div>
+          <canvas id="chartCanvas" width="264" height="78"></canvas>
+        </div>
+
+        <div class="slider-block">
+          <div class="slider-head">
+            <span>Энергия солнца и детрита</span>
+            <span id="lblSun">1.25x</span>
+          </div>
+          <input type="range" id="rngSun" min="0.5" max="2.5" step="0.05" value="1.25" />
+        </div>
+
+        <div class="slider-block">
+          <div class="slider-head">
+            <span>Вероятность усложнения ДНК (+ген)</span>
+            <span id="lblMut">25%</span>
+          </div>
+          <input type="range" id="rngMut" min="5" max="55" step="1" value="25" />
+        </div>
+
+        <div class="panel-title" style="margin-top:2px;">
+          <span>🧬 Специализации клеток</span>
+        </div>
+        <div class="legend-grid">
+          <div class="legend-cell"><span class="dot" style="background:#22c55e;box-shadow:0 0 5px #22c55e"></span>Хлоропласт</div>
+          <div class="legend-cell"><span class="dot" style="background:#f43f5e;box-shadow:0 0 5px #f43f5e"></span>Фагоцит (Укус)</div>
+          <div class="legend-cell"><span class="dot" style="background:#38bdf8;box-shadow:0 0 5px #38bdf8"></span>Миоцит (Тяга)</div>
+          <div class="legend-cell"><span class="dot" style="background:#facc15;box-shadow:0 0 5px #facc15"></span>Сенсор (Глаз)</div>
+          <div class="legend-cell"><span class="dot" style="background:#a855f7;box-shadow:0 0 5px #a855f7"></span>Нейрон (Мозг)</div>
+          <div class="legend-cell"><span class="dot" style="background:#e2e8f0;box-shadow:0 0 5px #e2e8f0"></span>Хитин (Броня)</div>
+        </div>
+      </aside>
+
+      <!-- ПРАВАЯ ПАНЕЛЬ: ИНСПЕКТОР ОРГАНИЗМА -->
+      <aside class="side-panel" id="rightPanel">
+        <div class="panel-title">
+          <span>🔬 Инспектор организма</span>
+          <div style="display:flex;gap:4px;">
+            <button id="btnFindGiant" style="padding:1px 6px;font-size:10px;">🏆 Гигант</button>
+            <button id="btnCloseRight" style="padding:1px 5px;font-size:10px;">✕</button>
+          </div>
+        </div>
+
+        <div id="inspEmpty" style="color:var(--text-muted);text-align:center;padding:14px 4px;">
+          Кликните по существу в океане или нажмите <b>«🏆 Гигант»</b>.
+        </div>
+
+        <div id="inspBody" style="display:none;flex-direction:column;gap:7px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <b id="uiOrgId" style="color:#fff;">Вид #1</b>
+              <span id="uiOrgGen" style="color:var(--text-muted);margin-left:5px;">Пок. 1</span>
+            </div>
+            <button id="btnFollow" style="padding:2px 7px;font-size:10px;">🎥 Следить</button>
+          </div>
+
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;">
+              <span style="color:var(--text-muted);">Рост тела (онтогенез):</span>
+              <b id="uiOntoTxt" style="color:#4ade80;">1 / 1</b>
+            </div>
+            <div class="onto-bar">
+              <div class="onto-fill" id="uiOntoFill" style="width:100%;"></div>
+            </div>
+          </div>
+
+          <div class="insp-grid">
+            <div class="insp-card">
+              <div class="k">Энергия / Деление</div>
+              <div class="v" id="uiEnergy">0 / 100</div>
+            </div>
+            <div class="insp-card">
+              <div class="k">Скорость / Тяга</div>
+              <div class="v" id="uiSpeed" style="color:#38bdf8;">0.0</div>
+            </div>
+            <div class="insp-card">
+              <div class="k">Связи (Триангуляция)</div>
+              <div class="v" id="uiLinks">0</div>
+            </div>
+            <div class="insp-card">
+              <div class="k">Съедено / Укусов</div>
+              <div class="v" id="uiKills" style="color:#f43f5e;">0</div>
+            </div>
+          </div>
+
+          <canvas id="blueprintCanvas" width="276" height="145"></canvas>
+
+          <div style="display:flex;gap:4px;">
+            <button id="btnClone" style="flex:1;">🧬 Клон</button>
+            <button id="btnMutatePlus" class="btn-amber" style="flex:1;">➕ +Ген</button>
+            <button id="btnOpenJson" style="flex:1;">📋 ДНК</button>
+          </div>
+
+          <div style="font-size:10px;color:var(--text-muted);">
+            ДНК (<span id="uiGeneCnt">1</span> генов → <span id="uiCellCnt">1</span> клеток):
+          </div>
+          <div class="gene-list" id="geneList"></div>
+        </div>
+      </aside>
     </div>
-  </aside>
 
-  <!-- DNA Export/Import Modal -->
-  <div class="modal-backdrop" id="dnaModal">
-    <div class="modal-box">
-      <div class="panel-header">
-        <span>📋 Экспорт / Импорт генетического кода (JSON)</span>
-        <button id="btnCloseModal">✕</button>
-      </div>
-      <p style="font-size:12px;color:var(--text-muted);">
-        Вы можете скопировать геном выбранного существа или вставить свой JSON-код (поддерживаются флаги <code>sym: 0|1</code>) и выпустить его в океан.
-      </p>
-      <textarea id="dnaTextarea" spellcheck="false"></textarea>
-      <div style="display:flex;justify-content:flex-end;gap:8px;">
-        <button id="btnCopyDna">Скопировать в буфер</button>
-        <button id="btnSpawnDna" class="btn-success">🚀 Выпустить вид в океан</button>
+    <!-- НИЖНЯЯ СТРОКА ПОДСКАЗОК -->
+    <div class="bottom-bar" id="bottomBar">
+      <div class="bottom-pill">
+        <span>🖱 Колесико — масштаб</span>
+        <span>•</span>
+        <span>Зажать ЛКМ — камера</span>
+        <span>•</span>
+        <span>Клик по существу — инспектор</span>
+        <span>•</span>
+        <span>Клавиша <b>H</b> — скрыть/показать панели</span>
       </div>
     </div>
   </div>
 
-  <div class="hint-pill">
-    Колесико мыши — зум • Зажать ЛКМ — перемещение камеры • Клик по существу — рентген тканей и нейроимпульсов
+  <!-- МОДАЛЬНОЕ ОКНО ЭКСПОРТА/ИМПОРТА ДНК -->
+  <div class="modal-overlay" id="dnaModal">
+    <div class="modal-card">
+      <div class="panel-title">
+        <span>📋 Генетический код организма (JSON)</span>
+        <button id="btnCloseModal">✕</button>
+      </div>
+      <textarea id="dnaInput" spellcheck="false"></textarea>
+      <div style="display:flex;justify-content:flex-end;gap:6px;">
+        <button id="btnCopyJson">Скопировать</button>
+        <button id="btnSpawnJson" class="btn-green">🚀 Выпустить в океан</button>
+      </div>
+    </div>
   </div>
 
   <script>
     // =========================================================================
-    // 1. КОНСТАНТЫ МИРА И СПЕЦИАЛИЗАЦИИ КЛЕТОК
+    // 1. ПАРАМЕТРЫ МИРА И СПЕЦИАЛИЗАЦИИ КЛЕТОК
     // =========================================================================
-    const WORLD_W = 3400;
-    const WORLD_H = 2100;
+    const WORLD_W = 3200;
+    const WORLD_H = 2000;
     const CELL_R = 7.5;
-    const LINK_DIST = CELL_R * 2.15;
-    const TRIANGULATION_DIST = CELL_R * 2.75; // Порог авто-сшивки соседних клеток в ткань
-    const MAX_PHENOTYPE_CELLS = 44;           // Безопасный предел клеток одного организма
-    const ZYGOTE_SPAWN_COST = 75;             // Честная фиксированная цена рождения 1-клеточной зиготы
-    const CELL_GROWTH_COST = 21;              // Энергия на достройку 1 клетки в ходе онтогенеза
+    const LINK_LEN = CELL_R * 2.15;
+    const TRIANG_DIST = CELL_R * 2.85;
+    const MAX_BODY_CELLS = 46;
 
-    const CELL_TYPES = [
-      { id: 0, name: 'Хлоропласт', color: '#22c55e', glow: 'rgba(34,197,94,0.45)', mass: 1.05, upkeep: 0.016 },
-      { id: 1, name: 'Фагоцит',    color: '#f43f5e', glow: 'rgba(244,63,94,0.50)',  mass: 1.15, upkeep: 0.024 },
-      { id: 2, name: 'Миоцит',     color: '#38bdf8', glow: 'rgba(56,189,248,0.50)', mass: 1.10, upkeep: 0.028 },
-      { id: 3, name: 'Сенсор',     color: '#facc15', glow: 'rgba(250,204,21,0.45)', mass: 0.90, upkeep: 0.020 },
-      { id: 4, name: 'Нейрон',     color: '#a855f7', glow: 'rgba(168,85,247,0.48)', mass: 0.85, upkeep: 0.018 },
-      { id: 5, name: 'Хитин',      color: '#e2e8f0', glow: 'rgba(226,232,240,0.35)',mass: 1.85, upkeep: 0.007 }
+    const CELL_SPECS = [
+      { id: 0, name: 'Хлоропласт', color: '#22c55e', glow: 'rgba(34,197,94,0.42)', mass: 1.0, upkeep: 0.012 },
+      { id: 1, name: 'Фагоцит',    color: '#f43f5e', glow: 'rgba(244,63,94,0.48)',  mass: 1.15, upkeep: 0.018 },
+      { id: 2, name: 'Миоцит',     color: '#38bdf8', glow: 'rgba(56,189,248,0.48)', mass: 1.05, upkeep: 0.020 },
+      { id: 3, name: 'Сенсор',     color: '#facc15', glow: 'rgba(250,204,21,0.42)', mass: 0.9,  upkeep: 0.015 },
+      { id: 4, name: 'Нейрон',     color: '#a855f7', glow: 'rgba(168,85,247,0.45)', mass: 0.85, upkeep: 0.014 },
+      { id: 5, name: 'Хитин',      color: '#e2e8f0', glow: 'rgba(226,232,240,0.35)',mass: 1.75, upkeep: 0.006 }
     ];
 
-    const laws = {
-      ontogenesis: true,
+    const config = {
+      kleiber: true,
       triangulation: true,
       symmetry: true,
-      torque: true,
-      sunMultiplier: 1.15,
-      duplicationRate: 0.22
+      momentum: true,
+      sunMult: 1.25,
+      dupChance: 0.25
     };
 
     // =========================================================================
-    // 2. ПРОСТРАНСТВЕННОЕ ХЕШИРОВАНИЕ (Spatial Hash Grid)
+    // 2. ПРОСТРАНСТВЕННАЯ СЕТКА (Spatial Hash Grid)
     // =========================================================================
     class SpatialGrid {
-      constructor(cellSize) {
-        this.cellSize = cellSize;
-        this.cols = Math.ceil(WORLD_W / cellSize) + 1;
-        this.rows = Math.ceil(WORLD_H / cellSize) + 1;
-        this.buckets = new Array(this.cols * this.rows);
-        for (let i = 0; i < this.buckets.length; i++) this.buckets[i] = [];
+      constructor(size) {
+        this.size = size;
+        this.cols = Math.ceil(WORLD_W / size) + 1;
+        this.rows = Math.ceil(WORLD_H / size) + 1;
+        this.cells = Array.from({ length: this.cols * this.rows }, () => []);
       }
       clear() {
-        for (let i = 0; i < this.buckets.length; i++) this.buckets[i].length = 0;
+        for (let i = 0; i < this.cells.length; i++) this.cells[i].length = 0;
       }
-      insert(item) {
-        const cx = Math.max(0, Math.min(this.cols - 1, (item.x / this.cellSize) | 0));
-        const cy = Math.max(0, Math.min(this.rows - 1, (item.y / this.cellSize) | 0));
-        this.buckets[cy * this.cols + cx].push(item);
+      insert(obj) {
+        const cx = Math.max(0, Math.min(this.cols - 1, (obj.x / this.size) | 0));
+        const cy = Math.max(0, Math.min(this.rows - 1, (obj.y / this.size) | 0));
+        this.cells[cy * this.cols + cx].push(obj);
       }
       query(x, y, r, out) {
         out.length = 0;
-        const minX = Math.max(0, ((x - r) / this.cellSize) | 0);
-        const maxX = Math.min(this.cols - 1, ((x + r) / this.cellSize) | 0);
-        const minY = Math.max(0, ((y - r) / this.cellSize) | 0);
-        const maxY = Math.min(this.rows - 1, ((y + r) / this.cellSize) | 0);
-        for (let cy = minY; cy <= maxY; cy++) {
-          const rowOffset = cy * this.cols;
-          for (let cx = minX; cx <= maxX; cx++) {
-            const b = this.buckets[rowOffset + cx];
-            for (let i = 0; i < b.length; i++) out.push(b[i]);
+        const x0 = Math.max(0, ((x - r) / this.size) | 0);
+        const x1 = Math.min(this.cols - 1, ((x + r) / this.size) | 0);
+        const y0 = Math.max(0, ((y - r) / this.size) | 0);
+        const y1 = Math.min(this.rows - 1, ((y + r) / this.size) | 0);
+        for (let cy = y0; cy <= y1; cy++) {
+          const row = cy * this.cols;
+          for (let cx = x0; cx <= x1; cx++) {
+            const arr = this.cells[row + cx];
+            for (let i = 0; i < arr.length; i++) out.push(arr[i]);
           }
         }
         return out;
@@ -726,204 +753,192 @@
     }
 
     // =========================================================================
-    // 3. МОРФОГЕНЕТИЧЕСКИЙ ПОСТРОИТЕЛЬ ЧЕРТЕЖА ТЕЛА ИЗ ДНК (С БИЛАТЕРАЛЬНОЙ СИММЕТРИЕЙ)
+    // 3. ПОСТРОЕНИЕ ЧЕРТЕЖА ТЕЛА ИЗ ГЕНОМА (С БИЛАТЕРАЛЬНОЙ СИММЕТРИЕЙ)
     // =========================================================================
-    function buildPhenotypeBlueprint(genome) {
-      // Узел чертежа: { lx, ly, localAngle, type, geneIndex, parentNodeIndex, side }
+    function buildBodyBlueprint(genome) {
       const nodes = [];
-      const geneToNodes = new Array(genome.length);
-      for (let i = 0; i < genome.length; i++) geneToNodes[i] = [];
+      const geneMap = Array.from({ length: genome.length }, () => []);
 
-      // Корневая клетка-зигота (#0) в центре (0, 0), смотрит вдоль +X
-      const rootGene = genome[0] || { type: 0, parent: -1, angle: 0, sym: 0 };
+      const root = genome[0] || { type: 0, parent: -1, angle: 0, sym: 0 };
       nodes.push({
         lx: 0,
         ly: 0,
         localAngle: 0,
-        type: rootGene.type,
-        geneIndex: 0,
-        parentNodeIndex: -1,
+        type: root.type,
+        geneIdx: 0,
+        parentNode: -1,
         side: 0
       });
-      geneToNodes[0].push(0);
+      geneMap[0].push(0);
 
       for (let gIdx = 1; gIdx < genome.length; gIdx++) {
-        if (nodes.length >= MAX_PHENOTYPE_CELLS) break;
+        if (nodes.length >= MAX_BODY_CELLS) break;
         const g = genome[gIdx];
-        const pGeneIdx = Math.max(0, Math.min(gIdx - 1, g.parent | 0));
-        const parentIndices = geneToNodes[pGeneIdx].length ? geneToNodes[pGeneIdx] : [0];
-        const useSym = laws.symmetry && g.sym === 1 && Math.abs(g.angle) > 0.14;
+        const pGene = Math.max(0, Math.min(gIdx - 1, g.parent | 0));
+        const pNodes = geneMap[pGene].length ? geneMap[pGene] : [0];
+        const isSym = config.symmetry && g.sym === 1 && Math.abs(g.angle) > 0.12;
 
-        for (let pi = 0; pi < parentIndices.length; pi++) {
-          if (nodes.length >= MAX_PHENOTYPE_CELLS) break;
-          const pNodeIdx = parentIndices[pi];
-          const pNode = nodes[pNodeIdx];
+        for (let pi = 0; pi < pNodes.length; pi++) {
+          if (nodes.length >= MAX_BODY_CELLS) break;
+          const pIdx = pNodes[pi];
+          const pNode = nodes[pIdx];
 
-          if (pNode.side === 0 && useSym) {
-            // Родитель на центральной оси и включен флаг симметрии -> создаем зеркальную пару (+angle и -angle)
-            const angles = [g.angle, -g.angle];
-            const sides = [1, -1];
+          if (pNode.side === 0 && isSym) {
+            // Зеркальная пара слева и справа от продольной оси
+            const pairAngles = [g.angle, -g.angle];
+            const pairSides = [1, -1];
             for (let s = 0; s < 2; s++) {
-              if (nodes.length >= MAX_PHENOTYPE_CELLS) break;
-              const dir = pNode.localAngle + angles[s];
-              const pos = resolveBlueprintOverlap(nodes, pNode.lx + Math.cos(dir) * LINK_DIST, pNode.ly + Math.sin(dir) * LINK_DIST, dir);
-              const newIdx = nodes.length;
+              if (nodes.length >= MAX_BODY_CELLS) break;
+              const dir = pNode.localAngle + pairAngles[s];
+              const pt = relaxBlueprintPoint(nodes, pNode.lx + Math.cos(dir) * LINK_LEN, pNode.ly + Math.sin(dir) * LINK_LEN, dir);
+              const idx = nodes.length;
               nodes.push({
-                lx: pos.x,
-                ly: pos.y,
+                lx: pt.x,
+                ly: pt.y,
                 localAngle: dir,
                 type: g.type,
-                geneIndex: gIdx,
-                parentNodeIndex: pNodeIdx,
-                side: sides[s]
+                geneIdx: gIdx,
+                parentNode: pIdx,
+                side: pairSides[s]
               });
-              geneToNodes[gIdx].push(newIdx);
+              geneMap[gIdx].push(idx);
             }
           } else {
-            // Обычная ветвь или продолжение уже симметричной боковой ветви (с зеркалированием знака угла)
             const sign = pNode.side === -1 ? -1 : 1;
             const dir = pNode.localAngle + g.angle * sign;
-            const pos = resolveBlueprintOverlap(nodes, pNode.lx + Math.cos(dir) * LINK_DIST, pNode.ly + Math.sin(dir) * LINK_DIST, dir);
-            const newIdx = nodes.length;
+            const pt = relaxBlueprintPoint(nodes, pNode.lx + Math.cos(dir) * LINK_LEN, pNode.ly + Math.sin(dir) * LINK_LEN, dir);
+            const idx = nodes.length;
             nodes.push({
-              lx: pos.x,
-              ly: pos.y,
+              lx: pt.x,
+              ly: pt.y,
               localAngle: dir,
               type: g.type,
-              geneIndex: gIdx,
-              parentNodeIndex: pNodeIdx,
+              geneIdx: gIdx,
+              parentNode: pIdx,
               side: pNode.side !== 0 ? pNode.side : (Math.abs(Math.sin(dir)) > 0.2 ? Math.sign(Math.sin(dir)) : 0)
             });
-            geneToNodes[gIdx].push(newIdx);
+            geneMap[gIdx].push(idx);
           }
         }
       }
       return nodes;
     }
 
-    function resolveBlueprintOverlap(nodes, tx, ty, dir) {
-      let x = tx;
-      let y = ty;
-      const minDist = CELL_R * 1.82;
-      for (let iter = 0; iter < 4; iter++) {
-        let pushed = false;
+    function relaxBlueprintPoint(nodes, tx, ty, dir) {
+      let x = tx, y = ty;
+      const minD = CELL_R * 1.84;
+      for (let it = 0; it < 4; it++) {
+        let moved = false;
         for (let i = 0; i < nodes.length; i++) {
           const dx = x - nodes[i].lx;
           const dy = y - nodes[i].ly;
           const d = Math.hypot(dx, dy);
-          if (d < minDist) {
-            const pushAngle = d > 0.001 ? Math.atan2(dy, dx) : dir;
-            x = nodes[i].lx + Math.cos(pushAngle) * minDist;
-            y = nodes[i].ly + Math.sin(pushAngle) * minDist;
-            pushed = true;
+          if (d < minD) {
+            const a = d > 0.001 ? Math.atan2(dy, dx) : dir;
+            x = nodes[i].lx + Math.cos(a) * minD;
+            y = nodes[i].ly + Math.sin(a) * minD;
+            moved = true;
           }
         }
-        if (!pushed) break;
+        if (!moved) break;
       }
       return { x, y };
     }
 
     // =========================================================================
-    // 4. КЛАСС ОРГАНИЗМА С ОНТОГЕНЕЗОМ, ТРИАНГУЛЯЦИЕЙ И КРУТЯЩИМ МОМЕНТОМ
+    // 4. КЛАСС ОРГАНИЗМА (ДИНАМИКА ЯДРА V1 + ПРЕИМУЩЕСТВА СЛОЖНОСТИ V2.5)
     // =========================================================================
-    let nextOrgId = 1;
+    let nextId = 1;
 
     class Organism {
-      constructor(x, y, angle, genome, generation = 1, startEnergy = 62, startFullGrown = false) {
-        this.id = nextOrgId++;
+      constructor(x, y, heading, genome, generation = 1, startEnergy = 95, fullGrown = false) {
+        this.id = nextId++;
         this.generation = generation;
         this.age = 0;
         this.energy = startEnergy;
         this.kills = 0;
         this.dead = false;
 
-        this.genome = genome.map(g => ({ ...g }));
-        this.blueprint = buildPhenotypeBlueprint(this.genome);
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 1.2;
+        this.vy = (Math.random() - 0.5) * 1.2;
+        this.heading = heading;
+        this.angVel = (Math.random() - 0.5) * 0.04;
+        this.wanderAngle = heading;
+        this.currentSpeed = 0;
 
-        // Физика центра масс и вращения
-        this.cx = x;
-        this.cy = y;
-        this.angle = angle;
-        this.omega = 0;          // Угловая скорость (рад/шаг)
-        this.totalMass = 1.0;
-        this.momentOfInertia = 25.0;
+        this.genome = genome.map(g => ({ ...g }));
+        this.blueprint = buildBodyBlueprint(this.genome);
 
         this.cells = [];
-        this.links = [];         // { a, b, restLen, triangulated, pulse }
+        this.links = [];
+        this.totalMass = 1;
+        this.counts = [0, 0, 0, 0, 0, 0];
+        this.symFinPairs = 0;
 
-        // Всегда создаем корневую клетку-зиготу (#0)
-        this.growNextCell(true);
+        // Личинка сразу рождается со стартовым ядром (до 3 клеток), чтобы активно плавать с первой секунды!
+        const initialCells = (!config.kleiber || fullGrown)
+          ? this.blueprint.length
+          : Math.min(this.blueprint.length, 3);
 
-        // Если старт сценария или выключен онтогенез — сразу достраиваем все клетки чертежа
-        if (startFullGrown || !laws.ontogenesis) {
-          while (this.cells.length < this.blueprint.length) {
-            this.growNextCell(true);
-          }
+        for (let i = 0; i < initialCells; i++) {
+          this.growNextCell(true);
         }
-        this.recalculateMassProps();
       }
 
-      // Достройка одной следующей клетки (или симметричной пары) по чертежу ДНК
       growNextCell(free = false) {
         const idx = this.cells.length;
         if (idx >= this.blueprint.length) return false;
-        if (!free && this.energy < CELL_GROWTH_COST + 28) return false;
+        const growCost = 16;
+        if (!free && this.energy < growCost + 45) return false;
 
         const bp = this.blueprint[idx];
-        const cosA = Math.cos(this.angle);
-        const sinA = Math.sin(this.angle);
+        const cosH = Math.cos(this.heading);
+        const sinH = Math.sin(this.heading);
+        const wx = this.x + (bp.lx * cosH - bp.ly * sinH);
+        const wy = this.y + (bp.lx * sinH + bp.ly * cosH);
 
-        let wx = this.cx + (bp.lx * cosA - bp.ly * sinA);
-        let wy = this.cy + (bp.lx * sinA + bp.ly * cosA);
-        let vx = 0, vy = 0;
-
-        if (bp.parentNodeIndex >= 0 && this.cells[bp.parentNodeIndex]) {
-          const pCell = this.cells[bp.parentNodeIndex];
-          vx = pCell.vx;
-          vy = pCell.vy;
-        }
-
-        const spec = CELL_TYPES[bp.type] || CELL_TYPES[0];
+        const spec = CELL_SPECS[bp.type] || CELL_SPECS[0];
         const cell = {
           org: this,
-          index: idx,
+          idx,
           type: bp.type,
           mass: spec.mass,
           x: Math.max(CELL_R, Math.min(WORLD_W - CELL_R, wx)),
           y: Math.max(CELL_R, Math.min(WORLD_H - CELL_R, wy)),
-          vx,
-          vy,
+          vx: this.vx,
+          vy: this.vy,
           lx: bp.lx,
           ly: bp.ly,
           localAngle: bp.localAngle,
           side: bp.side,
-          excitation: 0,     // Локальное возбуждение от сенсоров/нейронов
-          nextExcitation: 0,
-          linkCount: 0,      // Число связей для расчета экранирования тканью
-          sensorTargetAngle: 0,
+          linkCount: 0,
+          pulse: 0,
+          eyeAngle: this.heading,
           phase: Math.random() * Math.PI * 2
         };
 
         this.cells.push(cell);
-        if (!free) this.energy -= CELL_GROWTH_COST;
+        if (!free) this.energy -= growCost;
 
-        // 1. Первичная связь с родительской клеткой
-        if (bp.parentNodeIndex >= 0 && bp.parentNodeIndex < idx) {
-          this.addLink(bp.parentNodeIndex, idx, false);
+        // Связь с родителем
+        if (bp.parentNode >= 0 && bp.parentNode < idx) {
+          this.addLink(bp.parentNode, idx, false);
         }
 
-        // 2. Закон триангуляции тканей: авто-сшивка с близкими клетками своего организма
-        if (laws.triangulation && idx > 1) {
+        // Триангуляция тканей (сшивка соседних клеток в жесткий каркас)
+        if (config.triangulation && idx > 1) {
           for (let j = 0; j < idx; j++) {
-            if (j === bp.parentNodeIndex) continue;
-            const distBp = Math.hypot(bp.lx - this.blueprint[j].lx, bp.ly - this.blueprint[j].ly);
-            if (distBp <= TRIANGULATION_DIST) {
+            if (j === bp.parentNode) continue;
+            const d = Math.hypot(bp.lx - this.blueprint[j].lx, bp.ly - this.blueprint[j].ly);
+            if (d <= TRIANG_DIST) {
               this.addLink(j, idx, true);
             }
           }
         }
 
-        this.recalculateMassProps();
+        this.recalcStats();
         return true;
       }
 
@@ -932,192 +947,218 @@
           const l = this.links[i];
           if ((l.a === a && l.b === b) || (l.a === b && l.b === a)) return;
         }
-        const restLen = Math.max(
+        const rest = Math.max(
           CELL_R * 1.65,
           Math.hypot(this.blueprint[a].lx - this.blueprint[b].lx, this.blueprint[a].ly - this.blueprint[b].ly)
         );
-        this.links.push({ a, b, restLen, triangulated, pulse: 0 });
+        this.links.push({ a, b, rest, triangulated, pulse: 0 });
         this.cells[a].linkCount++;
         this.cells[b].linkCount++;
       }
 
-      recalculateMassProps() {
-        let mSum = 0;
-        let cx = 0, cy = 0;
-        let lcx = 0, lcy = 0;
+      recalcStats() {
+        this.counts.fill(0);
+        let m = 0;
+        let leftFins = 0, rightFins = 0;
         for (let i = 0; i < this.cells.length; i++) {
           const c = this.cells[i];
-          mSum += c.mass;
-          cx += c.x * c.mass;
-          cy += c.y * c.mass;
-          lcx += c.lx * c.mass;
-          lcy += c.ly * c.mass;
+          this.counts[c.type]++;
+          m += c.mass;
+          if (c.type === 2) {
+            if (c.side > 0) leftFins++;
+            if (c.side < 0) rightFins++;
+          }
         }
-        this.totalMass = mSum || 1;
-        this.cx = cx / this.totalMass;
-        this.cy = cy / this.totalMass;
-        this.comLx = lcx / this.totalMass;
-        this.comLy = lcy / this.totalMass;
-
-        let inertia = 0;
-        for (let i = 0; i < this.cells.length; i++) {
-          const c = this.cells[i];
-          const rx = c.lx - this.comLx;
-          const ry = c.ly - this.comLy;
-          inertia += c.mass * (rx * rx + ry * ry + 28);
-        }
-        this.momentOfInertia = Math.max(30, inertia);
+        this.totalMass = m || 1;
+        this.symFinPairs = Math.min(leftFins, rightFins);
       }
 
-      step(dt, seasonFactor, cellGrid, pelletGrid, queryBuf) {
+      // Максимальная емкость энергии (большие организмы с нейронами и хлоропластами накапливают жировой резерв)
+      maxEnergyCapacity() {
+        return 140 + this.cells.length * 42 + this.counts[4] * 35 + this.counts[0] * 20;
+      }
+
+      // Порог энергии для рождения потомка (по закону Клейбера N^0.72 вместо линейного штрафа)
+      reproThreshold() {
+        if (config.kleiber) {
+          return 95 + Math.pow(this.blueprint.length, 0.72) * 19;
+        }
+        return 95 + this.blueprint.length * 34;
+      }
+
+      step(seasonFactor, cellGrid, pelletGrid, queryBuf) {
         if (this.dead || this.cells.length === 0) {
           this.dead = true;
           return;
         }
         this.age++;
 
-        // 1. Онтогенез: если накоплен запас энергии, достраиваем следующую клетку тела
-        if (laws.ontogenesis && this.cells.length < this.blueprint.length) {
-          if (this.energy > CELL_GROWTH_COST + 36 + this.cells.length * 1.8) {
+        // 1. Онтогенез: быстрая достройка клеток тела по мере накопления энергии
+        if (config.kleiber && this.cells.length < this.blueprint.length) {
+          if (this.energy > 68) {
             this.growNextCell(false);
-            // Если следующая клетка — вторая половина симметричной пары, пытаемся вырастить и её для баланса
-            const nextIdx = this.cells.length;
+            // Если это симметричная пара, сразу достраиваем парную клетку
+            const nxt = this.cells.length;
             if (
-              nextIdx < this.blueprint.length &&
-              this.blueprint[nextIdx].geneIndex === this.blueprint[nextIdx - 1].geneIndex &&
-              this.energy > CELL_GROWTH_COST + 22
+              nxt < this.blueprint.length &&
+              this.blueprint[nxt].geneIdx === this.blueprint[nxt - 1].geneIdx &&
+              this.energy > 45
             ) {
               this.growNextCell(false);
             }
           }
         }
 
-        // 2. Вычисляем центр масс и мгновенный угол тела (через полярную декомпозицию позиций клеток)
-        let mSum = 0, sumX = 0, sumY = 0;
+        // 2. Метаболизм по закону Клейбера (крупные организмы экономнее в расходе на 1 клетку)
+        let rawUpkeep = 0;
+        let sunGain = 0;
         for (let i = 0; i < this.cells.length; i++) {
           const c = this.cells[i];
-          mSum += c.mass;
-          sumX += c.x * c.mass;
-          sumY += c.y * c.mass;
-        }
-        this.totalMass = mSum;
-        this.cx = sumX / mSum;
-        this.cy = sumY / mSum;
-
-        if (this.cells.length > 1) {
-          let cross = 0, dot = 0;
-          for (let i = 0; i < this.cells.length; i++) {
-            const c = this.cells[i];
-            const wx = c.x - this.cx;
-            const wy = c.y - this.cy;
-            const rx = c.lx - this.comLx;
-            const ry = c.ly - this.comLy;
-            dot += c.mass * (wx * rx + wy * ry);
-            cross += c.mass * (wx * ry - wy * rx);
-          }
-          if (dot * dot + cross * cross > 1e-3) {
-            this.angle = Math.atan2(cross, dot);
-          }
-        }
-
-        // 3. Метаболизм, фотосинтез, сенсоры и нейроны
-        let torqueSum = 0;
-        const cosA = Math.cos(this.angle);
-        const sinA = Math.sin(this.angle);
-
-        for (let i = 0; i < this.cells.length; i++) {
-          const c = this.cells[i];
-          const spec = CELL_TYPES[c.type];
-          this.energy -= spec.upkeep;
-
+          rawUpkeep += CELL_SPECS[c.type].upkeep;
           if (c.type === 0) {
-            // Хлоропласт: фотосинтез зависит от глубины Y и затенения соседями
-            const depthFactor = Math.max(0.08, 1.0 - (c.y / WORLD_H) * 0.88);
-            const crowding = Math.max(0.35, 1.0 - c.linkCount * 0.08);
-            this.energy += 0.068 * depthFactor * seasonFactor * laws.sunMultiplier * crowding;
-          } else if (c.type === 3 && (this.age + i) % 3 === 0) {
-            // Сенсор: локальный поиск еды или добычи
-            this.processSensor(c, cellGrid, pelletGrid, queryBuf);
-          } else if (c.type === 4) {
-            // Нейрон: ритмический водитель ритма + усилитель сигналов
-            const pacemaker = Math.sin(this.age * 0.16 + c.phase) * 0.35;
-            c.excitation = Math.max(-1.5, Math.min(1.5, c.excitation * 1.28 + pacemaker));
+            const depthLight = Math.max(0.12, 1.0 - (c.y / WORLD_H) * 0.85);
+            // Многоклеточные солнечные паруса получают синергию площади
+            const leafBonus = 1.0 + Math.min(0.45, this.counts[0] * 0.04);
+            sunGain += 0.072 * depthLight * seasonFactor * config.sunMult * leafBonus;
+          }
+        }
+        const kleiberScale = config.kleiber
+          ? Math.pow(this.cells.length, -0.24)
+          : 1.0;
+        this.energy += sunGain - rawUpkeep * kleiberScale;
+        if (this.energy > this.maxEnergyCapacity()) {
+          this.energy = this.maxEnergyCapacity();
+        }
+
+        // 3. Сенсорное сканирование и нейронное управление курсом (активная охота и бегство)
+        const sensorCount = this.counts[3];
+        const neuronCount = this.counts[4];
+        const jawCount = this.counts[1];
+
+        let targetAngle = null;
+        let urgency = 0;
+
+        if (sensorCount > 0 && (this.age + this.id) % 3 === 0) {
+          const visionRange = 155 + sensorCount * 42 + (config.momentum ? neuronCount * 38 : 0);
+          let bestScore = Infinity;
+          let bestX = 0, bestY = 0;
+          let fleeMode = false;
+
+          // Поиск органических гранул
+          pelletGrid.query(this.x, this.y, visionRange, queryBuf);
+          for (let i = 0; i < queryBuf.length; i++) {
+            const p = queryBuf[i];
+            const d = Math.hypot(p.x - this.x, p.y - this.y) - p.energy * 1.5;
+            if (d < bestScore) {
+              bestScore = d;
+              bestX = p.x;
+              bestY = p.y;
+              fleeMode = false;
+            }
+          }
+
+          // Поиск живой добычи или опасных хищников
+          cellGrid.query(this.x, this.y, visionRange, queryBuf);
+          for (let i = 0; i < queryBuf.length; i++) {
+            const other = queryBuf[i];
+            if (other.org === this) continue;
+            const d = Math.hypot(other.x - this.x, other.y - this.y);
+            if (jawCount > 0 && other.org.totalMass < this.totalMass * 1.25 && other.type !== 5) {
+              // Охотимся на более мелких или равных
+              if (d * 0.72 < bestScore) {
+                bestScore = d * 0.72;
+                bestX = other.x + other.vx * 5; // Упреждение цели нейросетью
+                bestY = other.y + other.vy * 5;
+                fleeMode = false;
+              }
+            } else if (other.org.counts[1] > 0 && other.org.totalMass > this.totalMass * 0.85 && d < 150) {
+              // Убегаем от опасного хищника
+              bestScore = -1000;
+              bestX = other.x;
+              bestY = other.y;
+              fleeMode = true;
+              break;
+            }
+          }
+
+          if (bestScore < Infinity) {
+            const ang = Math.atan2(bestY - this.y, bestX - this.x);
+            targetAngle = fleeMode ? ang + Math.PI : ang;
+            urgency = 1.0;
+            for (let i = 0; i < this.cells.length; i++) {
+              if (this.cells[i].type === 3) this.cells[i].eyeAngle = ang;
+            }
           }
         }
 
-        // 4. Распространение нервных сигналов по графу пружинных связей
-        for (let i = 0; i < this.cells.length; i++) {
-          this.cells[i].nextExcitation = this.cells[i].excitation * 0.72;
-        }
-        for (let i = 0; i < this.links.length; i++) {
-          const l = this.links[i];
-          const ca = this.cells[l.a];
-          const cb = this.cells[l.b];
-          const diff = (ca.excitation - cb.excitation) * 0.34;
-          cb.nextExcitation += diff;
-          ca.nextExcitation -= diff;
-          l.pulse = Math.min(1, Math.abs(ca.excitation) + Math.abs(cb.excitation));
-        }
-        for (let i = 0; i < this.cells.length; i++) {
-          this.cells[i].excitation = Math.max(-2.0, Math.min(2.0, this.cells[i].nextExcitation));
-        }
-
-        // 5. Тяга миоцитов и честный крутящий момент (τ = r × F)
-        for (let i = 0; i < this.cells.length; i++) {
-          const c = this.cells[i];
-          if (c.type === 2) {
-            const worldDir = this.angle + c.localAngle;
-            // Дифференциальная модуляция: если сигнал положительный, правая и левая стороны работают асимметрично
-            let sideMod = 1.0;
-            if (laws.torque) {
-              sideMod = 1.0 + c.excitation * (c.side !== 0 ? c.side * 0.85 : 0.45);
-            }
-            const wave = 0.65 + 0.35 * Math.sin(this.age * 0.28 + c.phase);
-            const thrust = 0.24 * wave * Math.max(-0.6, Math.min(2.1, sideMod));
-
-            const fx = Math.cos(worldDir) * thrust;
-            const fy = Math.sin(worldDir) * thrust;
-
-            c.vx += fx / c.mass;
-            c.vy += fy / c.mass;
-
-            if (laws.torque) {
-              const rx = c.x - this.cx;
-              const ry = c.y - this.cy;
-              torqueSum += rx * fy - ry * fx;
-            }
-            this.energy -= Math.abs(thrust) * 0.032;
-          }
-        }
-
-        // Применяем угловое ускорение от крутящего момента
-        if (laws.torque) {
-          this.omega = (this.omega + (torqueSum / this.momentOfInertia) * 1.6) * 0.86;
-          this.angle += this.omega;
+        // Если целей рядом нет — активное исследование океана (авто-тяга к свету у растений)
+        if (targetAngle !== null) {
+          this.wanderAngle = targetAngle;
         } else {
-          this.omega *= 0.8;
-        }
-
-        // 6. Релаксация упругих связей и удержание каркаса (триангуляция vs гибкая цепь)
-        const shapeStiffness = laws.triangulation ? 0.24 : 0.04;
-        const nCos = Math.cos(this.angle);
-        const nSin = Math.sin(this.angle);
-
-        for (let i = 0; i < this.cells.length; i++) {
-          const c = this.cells[i];
-          if (this.cells.length > 1) {
-            const rx = c.lx - this.comLx;
-            const ry = c.ly - this.comLy;
-            const targetX = this.cx + (rx * nCos - ry * nSin);
-            const targetY = this.cy + (rx * nSin + ry * nCos);
-            const k = laws.triangulation && c.linkCount >= 2 ? shapeStiffness : 0.05;
-            c.vx += (targetX - c.x) * k;
-            c.vy += (targetY - c.y) * k;
+          this.wanderAngle += (Math.random() - 0.5) * 0.22;
+          // Если много хлоропластов и глубоко — плывем ближе к солнцу
+          if (this.counts[0] > 0 && this.y > WORLD_H * 0.55) {
+            this.wanderAngle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
           }
         }
 
-        // Пружинные связи между клетками
-        const springK = laws.triangulation ? 0.38 : 0.22;
+        // Поворот с учетом нейронной маневренности и симметричных плавников
+        let diff = this.wanderAngle - this.heading;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+
+        const turnPower = 0.045 + Math.min(0.08, (this.counts[2] * 0.014) + (neuronCount * 0.015) + (this.symFinPairs * 0.012));
+        this.angVel = this.angVel * 0.75 + Math.max(-turnPower, Math.min(turnPower, diff * 0.25)) * 0.25;
+        this.heading += this.angVel;
+
+        // 4. ГИДРОДИНАМИЧЕСКАЯ ТЯГА (Никто не стоит на месте!)
+        const myoCount = this.counts[2];
+        const symBonus = config.symmetry ? (1.0 + this.symFinPairs * 0.18) : 1.0;
+        const neuroBoost = config.momentum ? (1.0 + neuronCount * 0.14 + urgency * 0.25) : 1.0;
+
+        // Базовое ресничное движение (0.14) + мощная тяга синих миоцитов с сублинейным трением
+        const rawThrust = (0.14 + myoCount * 0.36 * symBonus * neuroBoost);
+        const dragScale = Math.pow(this.cells.length, 0.52); // Крупные обтекаемые тела быстрее!
+        const accel = rawThrust / dragScale;
+
+        const pulseWave = 0.82 + 0.18 * Math.sin(this.age * 0.26);
+        this.vx += Math.cos(this.heading) * accel * pulseWave;
+        this.vy += Math.sin(this.heading) * accel * pulseWave;
+
+        // Легкие океанические течения и отталкивание от границ
+        this.vx += Math.sin(this.y * 0.003 + this.age * 0.004) * 0.012;
+        this.vy += 0.005;
+
+        const margin = 75;
+        if (this.x < margin) { this.vx += 0.18; this.wanderAngle = 0; }
+        if (this.x > WORLD_W - margin) { this.vx -= 0.18; this.wanderAngle = Math.PI; }
+        if (this.y < margin) { this.vy += 0.18; this.wanderAngle = Math.PI / 2; }
+        if (this.y > WORLD_H - margin) { this.vy -= 0.22; this.wanderAngle = -Math.PI / 2; }
+
+        this.vx *= 0.88;
+        this.vy *= 0.88;
+        this.x = Math.max(CELL_R * 2, Math.min(WORLD_W - CELL_R * 2, this.x + this.vx));
+        this.y = Math.max(CELL_R * 2, Math.min(WORLD_H - CELL_R * 2, this.y + this.vy));
+        this.currentSpeed = Math.hypot(this.vx, this.vy);
+
+        // Расход энергии на движение
+        this.energy -= myoCount * 0.009 * kleiberScale;
+
+        // 5. УПРУГАЯ ФИЗИКА КЛЕТОК И ТРИАНГУЛИРОВАННЫХ ТКАНЕЙ ВОКРУГ ЯДРА
+        const cosH = Math.cos(this.heading);
+        const sinH = Math.sin(this.heading);
+        const rig = config.triangulation ? 0.32 : 0.14;
+
+        for (let i = 0; i < this.cells.length; i++) {
+          const c = this.cells[i];
+          const tx = this.x + (c.lx * cosH - c.ly * sinH);
+          const ty = this.y + (c.lx * sinH + c.ly * cosH);
+
+          c.vx = (c.vx + (tx - c.x) * rig) * 0.76 + this.vx * 0.24;
+          c.vy = (c.vy + (ty - c.y) * rig) * 0.76 + this.vy * 0.24;
+        }
+
+        // Дополнительная жесткость пружинных и триангуляционных связей
         for (let i = 0; i < this.links.length; i++) {
           const l = this.links[i];
           const a = this.cells[l.a];
@@ -1125,175 +1166,81 @@
           const dx = b.x - a.x;
           const dy = b.y - a.y;
           const d = Math.hypot(dx, dy) || 0.001;
-          const diff = (d - l.restLen) / d;
-          const k = l.triangulated ? springK * 1.15 : springK;
-          const fx = dx * diff * k;
-          const fy = dy * diff * k;
-          a.vx += fx / a.mass;
-          a.vy += fy / a.mass;
-          b.vx -= fx / b.mass;
-          b.vy -= fy / b.mass;
+          const err = (d - l.rest) / d;
+          const k = l.triangulated ? 0.35 : 0.22;
+          const fx = dx * err * k;
+          const fy = dy * err * k;
+          a.vx += fx;
+          a.vy += fy;
+          b.vx -= fx;
+          b.vy -= fy;
+          l.pulse = 0.5 + 0.5 * Math.sin(this.age * 0.25 - i * 0.5);
         }
 
-        // 7. Интеграция скоростей, подводные течения и границы океана
         for (let i = 0; i < this.cells.length; i++) {
           const c = this.cells[i];
-          // Легкое глубинное течение и гравитация
-          c.vy += 0.006;
-          c.vx += Math.sin(c.y * 0.004 + this.age * 0.005) * 0.004;
-
-          c.vx *= 0.91;
-          c.vy *= 0.91;
-          c.x += c.vx;
-          c.y += c.vy;
-
-          if (c.x < CELL_R) { c.x = CELL_R; c.vx *= -0.6; }
-          if (c.x > WORLD_W - CELL_R) { c.x = WORLD_W - CELL_R; c.vx *= -0.6; }
-          if (c.y < CELL_R) { c.y = CELL_R; c.vy *= -0.6; }
-          if (c.y > WORLD_H - CELL_R) { c.y = WORLD_H - CELL_R; c.vy *= -0.6; }
+          c.x = Math.max(CELL_R, Math.min(WORLD_W - CELL_R, c.x + c.vx));
+          c.y = Math.max(CELL_R, Math.min(WORLD_H - CELL_R, c.y + c.vy));
         }
 
-        // Смерть от истощения или глубокой старости
-        const maxAge = 2600 + this.blueprint.length * 95;
-        if (this.energy <= 0 || this.age > maxAge) {
+        // Максимальная продолжительность жизни растет с размером организма
+        const maxLife = 2400 + this.cells.length * 120;
+        if (this.energy <= 0 || this.age > maxLife) {
           this.dead = true;
         }
       }
 
-      processSensor(sensorCell, cellGrid, pelletGrid, queryBuf) {
-        const range = 165;
-        let bestDist = range;
-        let targetX = 0, targetY = 0;
-        let found = false;
-        let flee = false;
-
-        // Ищем органические гранулы
-        pelletGrid.query(sensorCell.x, sensorCell.y, range, queryBuf);
-        for (let i = 0; i < queryBuf.length; i++) {
-          const p = queryBuf[i];
-          const d = Math.hypot(p.x - sensorCell.x, p.y - sensorCell.y);
-          if (d < bestDist) {
-            bestDist = d;
-            targetX = p.x;
-            targetY = p.y;
-            found = true;
-          }
-        }
-
-        // Ищем чужие клетки
-        cellGrid.query(sensorCell.x, sensorCell.y, range, queryBuf);
-        const hasJaws = this.cells.some(c => c.type === 1);
-        for (let i = 0; i < queryBuf.length; i++) {
-          const other = queryBuf[i];
-          if (other.org === this) continue;
-          const d = Math.hypot(other.x - sensorCell.x, other.y - sensorCell.y);
-          if (d < bestDist) {
-            if (hasJaws && other.org.totalMass < this.totalMass * 1.35) {
-              bestDist = d;
-              targetX = other.x;
-              targetY = other.y;
-              found = true;
-              flee = false;
-            } else if (other.type === 1 && other.org.totalMass > this.totalMass * 0.75) {
-              bestDist = d;
-              targetX = other.x;
-              targetY = other.y;
-              found = true;
-              flee = true;
-            }
-          }
-        }
-
-        if (found) {
-          const desiredAngle = Math.atan2(targetY - sensorCell.y, targetX - sensorCell.x);
-          sensorCell.sensorTargetAngle = desiredAngle;
-          let diff = desiredAngle - this.angle;
-          while (diff > Math.PI) diff -= Math.PI * 2;
-          while (diff < -Math.PI) diff += Math.PI * 2;
-          const dirSign = flee ? -1 : 1;
-
-          if (laws.torque) {
-            // Инжектируем дифференциальный сигнал в локальную сеть
-            sensorCell.excitation = Math.max(-1.8, Math.min(1.8, Math.sin(diff) * 1.65 * dirSign));
-          } else {
-            // Старый режим с глобальным подруливанием (если тумблер 4 выключен)
-            this.angle += Math.sign(diff) * 0.045 * dirSign;
-          }
-        } else {
-          sensorCell.excitation *= 0.5;
-        }
+      canDivide() {
+        const minGrown = Math.max(1, Math.floor(this.blueprint.length * 0.6));
+        return this.cells.length >= minGrown && this.energy >= this.reproThreshold();
       }
 
-      // Проверка готовности к размножению
-      canReproduce() {
-        if (laws.ontogenesis) {
-          // Достаточно вырастить хотя бы 55% тела (или минимум 1 клетку) и накопить цену 1 зиготы + буфер
-          const minGrown = Math.max(1, Math.ceil(this.blueprint.length * 0.55));
-          return this.cells.length >= minGrown && this.energy >= ZYGOTE_SPAWN_COST + 55;
-        } else {
-          // Классический режим: нужно накопить пропорционально всему размеру генома
-          const classicCost = 100 + this.blueprint.length * 34;
-          return this.energy >= classicCost;
-        }
-      }
-
-      reproduce() {
-        const spawnCost = laws.ontogenesis
-          ? ZYGOTE_SPAWN_COST
-          : (55 + this.blueprint.length * 18);
-
-        this.energy -= spawnCost;
-        const childGenome = mutateGenome(this.genome);
-        const offsetAngle = this.angle + Math.PI + (Math.random() - 0.5) * 0.6;
-        const dist = CELL_R * 3.2;
-        const childX = Math.max(30, Math.min(WORLD_W - 30, this.cx + Math.cos(offsetAngle) * dist));
-        const childY = Math.max(30, Math.min(WORLD_H - 30, this.cy + Math.sin(offsetAngle) * dist));
-
-        return new Organism(
-          childX,
-          childY,
-          offsetAngle,
-          childGenome,
-          this.generation + 1,
-          laws.ontogenesis ? 58 : spawnCost * 0.85,
-          !laws.ontogenesis
-        );
+      divide() {
+        const childEnergy = this.energy * 0.46;
+        this.energy *= 0.50;
+        const childGenome = mutateDNA(this.genome);
+        const ang = this.heading + Math.PI + (Math.random() - 0.5) * 0.8;
+        const ox = Math.max(30, Math.min(WORLD_W - 30, this.x + Math.cos(ang) * 28));
+        const oy = Math.max(30, Math.min(WORLD_H - 30, this.y + Math.sin(ang) * 28));
+        return new Organism(ox, oy, ang, childGenome, this.generation + 1, Math.max(70, childEnergy), false);
       }
     }
 
     // =========================================================================
-    // 5. ГЕНЕТИЧЕСКИЕ МУТАЦИИ И СТРУКТУРНАЯ ДУПЛИКАЦИЯ (БЕЗ ПОТОЛКА)
+    // 5. ГЕНЕТИЧЕСКИЕ МУТАЦИИ С ОТКРЫТОЙ ДУПЛИКАЦИЕЙ И СИММЕТРИЕЙ
     // =========================================================================
-    function mutateGenome(genome) {
+    function mutateDNA(genome) {
       const next = genome.map(g => ({ ...g }));
 
-      // 1. Точечная мутация параметров существующих генов (22% шанс)
-      if (Math.random() < 0.22 && next.length > 0) {
+      // 1. Точечная мутация существующего гена
+      if (Math.random() < 0.24 && next.length > 0) {
         const idx = (Math.random() * next.length) | 0;
         const g = next[idx];
         const r = Math.random();
         if (r < 0.35) {
           g.angle += (Math.random() - 0.5) * 0.55;
-        } else if (r < 0.68) {
-          g.type = (Math.random() * CELL_TYPES.length) | 0;
-        } else if (idx > 0 && r < 0.88) {
-          g.sym = laws.symmetry ? (g.sym === 1 ? 0 : 1) : 0;
+        } else if (r < 0.70) {
+          g.type = (Math.random() * CELL_SPECS.length) | 0;
+        } else if (idx > 0 && r < 0.90) {
+          g.sym = config.symmetry ? (g.sym === 1 ? 0 : 1) : 0;
         } else if (idx > 0) {
           g.parent = (Math.random() * idx) | 0;
         }
       }
 
-      // 2. Структурная дупликация (Добавление нового гена-органа или симметричной пары)
-      if (Math.random() < laws.duplicationRate && next.length < 24) {
-        const parentIdx = (Math.random() * next.length) | 0;
-        const angle = (Math.random() * 1.9 + 0.35) * (Math.random() < 0.5 ? 1 : -1);
-        const sym = laws.symmetry && Math.random() < 0.58 ? 1 : 0;
-        const type = (Math.random() * CELL_TYPES.length) | 0;
-        next.push({ type, parent: parentIdx, angle, sym });
+      // 2. Структурная дупликация (рост числа генов и органов вплоть до 26 генов / 46 клеток)
+      if (Math.random() < config.dupChance && next.length < 26) {
+        const parent = (Math.random() * next.length) | 0;
+        const angle = (Math.random() * 1.75 + 0.42) * (Math.random() < 0.5 ? 1 : -1);
+        const sym = config.symmetry && Math.random() < 0.65 ? 1 : 0;
+        // Повышенный шанс полезных синергетических органов (миоциты, хлоропласты, фагоциты, нейроны)
+        const pool = [0, 0, 1, 1, 2, 2, 3, 4, 5];
+        const type = pool[(Math.random() * pool.length) | 0];
+        next.push({ type, parent, angle, sym });
       }
 
-      // 3. Редкая делеция гена (5% шанс — отсечение бесполезных рудиментов)
-      if (next.length > 2 && Math.random() < 0.05) {
+      // 3. Редкая потеря концевого гена (4%)
+      if (next.length > 2 && Math.random() < 0.04) {
         next.pop();
       }
 
@@ -1301,173 +1248,168 @@
     }
 
     // =========================================================================
-    // 6. СОСТОЯНИЕ СИМУЛЯЦИИ, СЦЕНАРИИ И DETRITUS PELLETS
+    // 6. ПРЕСЕТЫ ВИДОВ И ИНИЦИАЛИЗАЦИЯ ОКЕАНА
     // =========================================================================
     const organisms = [];
     const pellets = [];
-    const particles = [];
-    const complexityHistory = [];
+    const sparks = [];
+    const history = [];
 
-    const cellGrid = new SpatialGrid(42);
-    const pelletGrid = new SpatialGrid(55);
+    const cellGrid = new SpatialGrid(44);
+    const pelletGrid = new SpatialGrid(56);
     const queryBuf = [];
 
-    let simTick = 0;
+    let tick = 0;
     let paused = false;
-    let warpFactor = 1;
+    let warp = 1;
     let selectedOrg = null;
-    let followSelected = false;
+    let followMode = false;
 
-    function spawnPellet(x, y, energy = 16) {
-      if (pellets.length > 950) return;
-      pellets.push({
-        x: Math.max(10, Math.min(WORLD_W - 10, x)),
-        y: Math.max(10, Math.min(WORLD_H - 10, y)),
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: Math.random() * 0.25 + 0.05,
-        energy,
-        r: Math.min(5.5, 2.2 + energy * 0.1)
-      });
-    }
-
-    function createPresetGenome(kind) {
-      if (kind === 'zygote') {
-        return [{ type: 0, parent: -1, angle: 0, sym: 0 }];
-      }
-      if (kind === 'trilobite') {
-        // Билатерально-симметричный панцирный собиратель (11 клеток из 6 генов)
-        return [
-          { type: 4, parent: -1, angle: 0, sym: 0 },     // Нейронное ядро
-          { type: 3, parent: 0, angle: 0.55, sym: 1 },   // Пара глаз спереди
-          { type: 0, parent: 0, angle: 1.55, sym: 1 },   // Пара хлоропластов
-          { type: 5, parent: 2, angle: 0.65, sym: 1 },   // Боковые хитиновые щитки
-          { type: 0, parent: 0, angle: 3.14, sym: 0 },   // Хвостовой хлоропласт
-          { type: 2, parent: 4, angle: 0.48, sym: 1 }    // Пара хвостовых плавников
-        ];
-      }
-      if (kind === 'leviathan') {
-        // Крупный симметричный хищник с челюстями, глазами, нейросетью и 4 плавниками (13 клеток)
-        return [
-          { type: 4, parent: -1, angle: 0, sym: 0 },     // Центральный ганглий
-          { type: 1, parent: 0, angle: 0.42, sym: 1 },   // Парные красные жвала
-          { type: 3, parent: 0, angle: 1.05, sym: 1 },   // Широко расставленные сенсоры
-          { type: 5, parent: 0, angle: 1.85, sym: 1 },   // Плечевая броня
-          { type: 4, parent: 0, angle: 3.14, sym: 0 },   // Спинной нейрон
-          { type: 2, parent: 4, angle: 0.65, sym: 1 },   // Передняя пара плавников
-          { type: 2, parent: 4, angle: 0.28, sym: 1 }    // Задняя маршевая пара плавников
-        ];
-      }
-      if (kind === 'reef') {
-        // Многоклеточная фотосинтезирующая колония с шипами (12 клеток)
+    function makePresetDNA(name) {
+      if (name === 'seed') {
         return [
           { type: 0, parent: -1, angle: 0, sym: 0 },
-          { type: 0, parent: 0, angle: 1.05, sym: 1 },
-          { type: 0, parent: 1, angle: 0.85, sym: 1 },
-          { type: 5, parent: 2, angle: 0.55, sym: 1 },
-          { type: 1, parent: 0, angle: 3.14, sym: 0 },
-          { type: 2, parent: 4, angle: 0.5, sym: 1 }
+          { type: 2, parent: 0, angle: 2.55, sym: 1 }
         ];
       }
-      // Случайный стартовый вид
+      if (name === 'manta') {
+        // Быстрый симметричный фильтратор-пловец (11 клеток)
+        return [
+          { type: 4, parent: -1, angle: 0, sym: 0 },
+          { type: 3, parent: 0, angle: 0.52, sym: 1 },
+          { type: 0, parent: 0, angle: 1.35, sym: 1 },
+          { type: 0, parent: 2, angle: 0.65, sym: 1 },
+          { type: 2, parent: 0, angle: 2.45, sym: 1 },
+          { type: 5, parent: 2, angle: 1.15, sym: 1 }
+        ];
+      }
+      if (name === 'predator') {
+        // Хищный трилобит с челюстями, глазами, нейросетью и 4 плавниками (13 клеток)
+        return [
+          { type: 4, parent: -1, angle: 0, sym: 0 },
+          { type: 1, parent: 0, angle: 0.42, sym: 1 },
+          { type: 3, parent: 0, angle: 0.98, sym: 1 },
+          { type: 5, parent: 0, angle: 1.75, sym: 1 },
+          { type: 4, parent: 0, angle: 3.14, sym: 0 },
+          { type: 2, parent: 4, angle: 0.68, sym: 1 },
+          { type: 2, parent: 4, angle: 0.28, sym: 1 }
+        ];
+      }
+      if (name === 'leviathan') {
+        // 19-клеточный бронированный гигант-левиафан
+        return [
+          { type: 4, parent: -1, angle: 0, sym: 0 },
+          { type: 1, parent: 0, angle: 0.36, sym: 1 },
+          { type: 1, parent: 1, angle: 0.45, sym: 1 },
+          { type: 3, parent: 0, angle: 0.95, sym: 1 },
+          { type: 0, parent: 0, angle: 1.58, sym: 1 },
+          { type: 5, parent: 4, angle: 0.75, sym: 1 },
+          { type: 4, parent: 0, angle: 3.14, sym: 0 },
+          { type: 0, parent: 6, angle: 1.35, sym: 1 },
+          { type: 2, parent: 6, angle: 0.65, sym: 1 },
+          { type: 2, parent: 8, angle: 0.35, sym: 1 }
+        ];
+      }
       return [
         { type: 0, parent: -1, angle: 0, sym: 0 },
-        { type: 2, parent: 0, angle: 2.6, sym: 1 },
-        { type: 3, parent: 0, angle: 0.5, sym: 1 }
+        { type: 1, parent: 0, angle: 0.5, sym: 1 },
+        { type: 2, parent: 0, angle: 2.5, sym: 1 }
       ];
     }
 
-    function initWorld(preset = 'cambrian') {
+    function addPellet(x, y, energy = 18) {
+      if (pellets.length > 950) return;
+      pellets.push({
+        x: Math.max(12, Math.min(WORLD_W - 12, x)),
+        y: Math.max(12, Math.min(WORLD_H - 12, y)),
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: 0.08 + Math.random() * 0.22,
+        energy,
+        r: Math.min(5.5, 2.3 + energy * 0.09)
+      });
+    }
+
+    function resetWorld(mode = 'cambrian') {
       organisms.length = 0;
       pellets.length = 0;
-      particles.length = 0;
-      complexityHistory.length = 0;
-      simTick = 0;
-      selectedOrg = null;
+      sparks.length = 0;
+      history.length = 0;
+      tick = 0;
 
-      // Заполняем океан стартовой органикой
-      for (let i = 0; i < 380; i++) {
-        spawnPellet(Math.random() * WORLD_W, Math.random() * WORLD_H, 14 + Math.random() * 14);
+      for (let i = 0; i < 420; i++) {
+        addPellet(Math.random() * WORLD_W, Math.random() * WORLD_H, 16 + Math.random() * 14);
       }
 
-      if (preset === 'primordial') {
-        for (let i = 0; i < 95; i++) {
-          const g = [
-            { type: Math.random() < 0.75 ? 0 : 1, parent: -1, angle: 0, sym: 0 }
-          ];
-          if (Math.random() < 0.35) {
-            g.push({ type: 2, parent: 0, angle: 2.5, sym: 1 });
-          }
-          organisms.push(new Organism(
-            120 + Math.random() * (WORLD_W - 240),
-            120 + Math.random() * (WORLD_H - 350),
-            Math.random() * Math.PI * 2,
-            g,
-            1,
-            72,
-            true
-          ));
-        }
-      } else if (preset === 'cambrian') {
-        const templates = ['trilobite', 'reef', 'leviathan', 'random'];
-        for (let i = 0; i < 68; i++) {
-          const t = templates[i % templates.length];
-          const g = mutateGenome(createPresetGenome(t));
+      if (mode === 'primordial') {
+        for (let i = 0; i < 85; i++) {
+          const dna = mutateDNA(makePresetDNA('seed'));
           organisms.push(new Organism(
             120 + Math.random() * (WORLD_W - 240),
             120 + Math.random() * (WORLD_H - 240),
             Math.random() * Math.PI * 2,
-            g,
+            dna,
             1,
             95,
-            i < 36 // Половина стартует взрослыми, половина растет из зиготы
+            true
           ));
         }
-      } else if (preset === 'armsrace') {
-        for (let i = 0; i < 60; i++) {
-          const t = i % 3 === 0 ? 'leviathan' : 'trilobite';
-          const g = mutateGenome(createPresetGenome(t));
+      } else if (mode === 'cambrian') {
+        const list = ['manta', 'predator', 'seed', 'leviathan'];
+        for (let i = 0; i < 68; i++) {
+          const dna = mutateDNA(makePresetDNA(list[i % list.length]));
           organisms.push(new Organism(
             120 + Math.random() * (WORLD_W - 240),
             120 + Math.random() * (WORLD_H - 240),
             Math.random() * Math.PI * 2,
-            g,
+            dna,
             1,
-            110,
+            125,
+            true
+          ));
+        }
+      } else if (mode === 'giants') {
+        const list = ['leviathan', 'predator', 'manta'];
+        for (let i = 0; i < 58; i++) {
+          const dna = mutateDNA(makePresetDNA(list[i % list.length]));
+          organisms.push(new Organism(
+            120 + Math.random() * (WORLD_W - 240),
+            120 + Math.random() * (WORLD_H - 240),
+            Math.random() * Math.PI * 2,
+            dna,
+            1,
+            150,
             true
           ));
         }
       }
 
-      selectLargestOrganism();
-      updateInspectorUI();
+      findLargestOrganism();
+      refreshInspector();
     }
 
     // =========================================================================
-    // 7. ФИЗИКА СТОЛКНОВЕНИЙ, ИМПУЛЬСНОГО ТАРАНА И ЭКРАНИРОВАНИЯ ТКАНЕЙ
+    // 7. ШАГ СИМУЛЯЦИИ, ПИТАНИЕ, ТАРАН И ЭКРАНИРОВАНИЕ ТКАНЕЙ
     // =========================================================================
-    function stepSimulation() {
-      simTick++;
-      const seasonFactor = 0.72 + 0.28 * Math.sin(simTick * 0.0008);
+    function stepWorld() {
+      tick++;
+      const season = 0.75 + 0.25 * Math.sin(tick * 0.0009);
 
-      // Поддержка минимальной популяции при вымирании
-      if (organisms.length < 18 && simTick % 20 === 0) {
+      if (organisms.length < 22 && tick % 15 === 0) {
         organisms.push(new Organism(
           200 + Math.random() * (WORLD_W - 400),
-          150 + Math.random() * (WORLD_H * 0.5),
+          150 + Math.random() * (WORLD_H - 300),
           Math.random() * Math.PI * 2,
-          mutateGenome(createPresetGenome('trilobite')),
+          mutateDNA(makePresetDNA('manta')),
           1,
-          80,
-          false
+          110,
+          true
         ));
       }
 
-      // Случайный дождь органики сверху
-      if (simTick % 4 === 0 && pellets.length < 650) {
-        spawnPellet(Math.random() * WORLD_W, 20 + Math.random() * (WORLD_H * 0.75), 14);
+      if (tick % 3 === 0 && pellets.length < 720) {
+        addPellet(Math.random() * WORLD_W, 20 + Math.random() * (WORLD_H * 0.8), 16 * config.sunMult);
       }
 
-      // Заполняем пространственные сетки
       cellGrid.clear();
       pelletGrid.clear();
 
@@ -1475,134 +1417,108 @@
         const p = pellets[i];
         p.x += p.vx;
         p.y += p.vy;
-        p.vx *= 0.98;
-        p.vy = Math.min(0.45, p.vy + 0.003);
-        if (p.y > WORLD_H - 12) { p.y = WORLD_H - 12; p.vy *= -0.3; }
-        if (p.x < 10 || p.x > WORLD_W - 10) p.vx *= -1;
+        if (p.y > WORLD_H - 12) { p.y = WORLD_H - 12; p.vy *= -0.4; }
+        if (p.x < 12 || p.x > WORLD_W - 12) p.vx *= -1;
         pelletGrid.insert(p);
       }
 
       for (let i = 0; i < organisms.length; i++) {
-        const org = organisms[i];
-        for (let j = 0; j < org.cells.length; j++) {
-          cellGrid.insert(org.cells[j]);
+        const o = organisms[i];
+        for (let j = 0; j < o.cells.length; j++) {
+          cellGrid.insert(o.cells[j]);
         }
       }
 
-      // Шаг каждого организма
-      const newborn = [];
+      const children = [];
       for (let i = organisms.length - 1; i >= 0; i--) {
-        const org = organisms[i];
-        org.step(1, seasonFactor, cellGrid, pelletGrid, queryBuf);
+        const o = organisms[i];
+        o.step(season, cellGrid, pelletGrid, queryBuf);
 
-        if (org.dead) {
-          // При гибели клетки распадаются в питательный детрит
-          for (let j = 0; j < org.cells.length; j++) {
-            if (Math.random() < 0.65) {
-              spawnPellet(org.cells[j].x, org.cells[j].y, 13);
-            }
+        if (o.dead) {
+          for (let j = 0; j < o.cells.length; j++) {
+            if (Math.random() < 0.65) addPellet(o.cells[j].x, o.cells[j].y, 14);
           }
-          if (selectedOrg === org) selectedOrg = null;
+          if (selectedOrg === o) selectedOrg = null;
           organisms.splice(i, 1);
           continue;
         }
 
-        if (org.canReproduce() && organisms.length + newborn.length < 185) {
-          newborn.push(org.reproduce());
+        if (o.canDivide() && organisms.length + children.length < 175) {
+          children.push(o.divide());
         }
       }
-      for (let i = 0; i < newborn.length; i++) organisms.push(newborn[i]);
+      for (let i = 0; i < children.length; i++) organisms.push(children[i]);
 
-      // Столкновения клеток, питание и импульсный бой
-      const minCellDist = CELL_R * 2.0;
+      // Столкновения, сбор органики и хищничество
+      const colDist = CELL_R * 2.05;
       for (let i = 0; i < organisms.length; i++) {
         const orgA = organisms[i];
         for (let j = 0; j < orgA.cells.length; j++) {
           const cA = orgA.cells[j];
 
-          // 1. Поглощение гранул детрита (Фагоциты или одиночные зиготы)
-          if (cA.type === 1 || orgA.cells.length <= 2) {
-            pelletGrid.query(cA.x, cA.y, CELL_R + 7, queryBuf);
-            for (let k = 0; k < queryBuf.length; k++) {
-              const p = queryBuf[k];
-              if (p.energy <= 0) continue;
-              const d = Math.hypot(p.x - cA.x, p.y - cA.y);
-              if (d < CELL_R + p.r) {
-                const gain = cA.type === 1 ? p.energy : p.energy * 0.65;
-                orgA.energy += gain;
-                orgA.kills++;
-                p.energy = 0;
-              }
+          // Любая внешняя клетка (особенно фагоциты и хлоропласты) подбирает питательный детрит при контакте
+          pelletGrid.query(cA.x, cA.y, CELL_R + 7, queryBuf);
+          for (let k = 0; k < queryBuf.length; k++) {
+            const p = queryBuf[k];
+            if (p.energy <= 0) continue;
+            if (Math.hypot(p.x - cA.x, p.y - cA.y) < CELL_R + p.r) {
+              const eff = cA.type === 1 ? 1.25 : 0.78;
+              orgA.energy += p.energy * eff;
+              orgA.kills++;
+              p.energy = 0;
             }
           }
 
-          // 2. Межклеточные столкновения и хищничество
-          cellGrid.query(cA.x, cA.y, minCellDist, queryBuf);
+          // Контакты между клетками разных организмов
+          cellGrid.query(cA.x, cA.y, colDist, queryBuf);
           for (let k = 0; k < queryBuf.length; k++) {
             const cB = queryBuf[k];
-            if (cA === cB) continue;
+            if (cA.org === cB.org) continue;
 
             const dx = cB.x - cA.x;
             const dy = cB.y - cA.y;
             const d = Math.hypot(dx, dy);
-            if (d <= 0.0001 || d >= minCellDist) continue;
+            if (d <= 0.001 || d >= colDist) continue;
 
             const nx = dx / d;
             const ny = dy / d;
-            const overlap = (minCellDist - d) * 0.5;
+            const overlap = (colDist - d) * 0.5;
 
-            if (cA.org === cB.org) {
-              // Мягкое расталкивание клеток внутри одного организма
-              cA.x -= nx * overlap * 0.35;
-              cA.y -= ny * overlap * 0.35;
-              cB.x += nx * overlap * 0.35;
-              cB.y += ny * overlap * 0.35;
-            } else {
-              // Столкновение разных организмов с учетом соотношения масс
-              const mA = cA.org.totalMass;
-              const mB = cB.org.totalMass;
-              const mSum = mA + mB;
-              const ratioA = mB / mSum;
-              const ratioB = mA / mSum;
+            const mA = orgA.totalMass;
+            const mB = cB.org.totalMass;
+            const mSum = mA + mB;
 
-              cA.x -= nx * overlap * ratioA;
-              cA.y -= ny * overlap * ratioA;
-              cB.x += nx * overlap * ratioB;
-              cB.y += ny * overlap * ratioB;
+            // Упругое отталкивание пропорционально массам
+            orgA.x -= nx * overlap * (mB / mSum) * 0.45;
+            orgA.y -= ny * overlap * (mB / mSum) * 0.45;
+            cB.org.x += nx * overlap * (mA / mSum) * 0.45;
+            cB.org.y += ny * overlap * (mA / mSum) * 0.45;
 
-              // Относительная скорость сближения (для импульсного тарана)
-              const rvx = cA.vx - cB.vx;
-              const rvy = cA.vy - cB.vy;
-              const relSpeed = Math.max(0, rvx * nx + rvy * ny);
+            // Атака красного Фагоцита
+            if (cA.type === 1 && !cB.org.dead) {
+              let shield = cB.type === 5 ? 0.18 : 1.0;
 
-              cA.vx -= nx * 0.22 * ratioA;
-              cA.vy -= ny * 0.22 * ratioA;
-              cB.vx += nx * 0.22 * ratioB;
-              cB.vy += ny * 0.22 * ratioB;
+              // Закон 2: Триангулированная плотная ткань экранирует внутренние клетки на 75%
+              if (config.triangulation && cB.linkCount >= 3) {
+                shield *= Math.max(0.25, 1.0 - (cB.linkCount - 2) * 0.25);
+              }
 
-              // Укус Фагоцита (Честная физика: импульс тарана + экранирование тканей)
-              if (cA.type === 1 && !cB.org.dead) {
-                let armorFactor = cB.type === 5 ? 0.16 : 1.0;
+              // Закон 4: Импульсный таран (крупный хищник на скорости наносит сокрушительный урон, мелкий паразит отскакивает)
+              let ramBonus = 1.0;
+              if (config.momentum) {
+                const massRatio = (2 * mA) / (mA + mB);
+                const relVel = Math.max(0, (orgA.vx - cB.org.vx) * nx + (orgA.vy - cB.org.vy) * ny);
+                ramBonus = massRatio * (0.85 + relVel * 0.35);
+              }
 
-                // Экранирование тканей: клетка внутри триангулированного каркаса защищена соседями
-                if (laws.triangulation && cB.linkCount >= 3) {
-                  armorFactor *= Math.max(0.28, 1.0 - (cB.linkCount - 2) * 0.22);
-                }
-
-                // Импульсный множитель: массивный хищник на скорости пробивает защиту эффективнее
-                let momentumBonus = 1.0;
-                if (laws.torque) {
-                  const massAdvantage = (2 * mA) / (mA + mB);
-                  momentumBonus = massAdvantage * (0.85 + relSpeed * 0.45);
-                }
-
-                const drain = 1.45 * armorFactor * momentumBonus;
-                if (drain > 0.08) {
-                  cB.org.energy -= drain;
-                  cA.org.energy += drain * 0.88;
-                  if (Math.random() < 0.25) {
-                    orgA.kills++;
-                    spawnSpark(cB.x, cB.y, '#f43f5e');
+              const bite = 1.65 * shield * ramBonus;
+              if (bite > 0.08) {
+                cB.org.energy -= bite;
+                orgA.energy += bite * 0.92;
+                if (Math.random() < 0.25) {
+                  orgA.kills++;
+                  if (sparks.length < 100) {
+                    sparks.push({ x: cB.x, y: cB.y, vx: (Math.random() - 0.5) * 2.5, vy: (Math.random() - 0.5) * 2.5, life: 1 });
                   }
                 }
               }
@@ -1611,172 +1527,142 @@
         }
       }
 
-      // Удаляем съеденные гранулы
       for (let i = pellets.length - 1; i >= 0; i--) {
         if (pellets[i].energy <= 0) pellets.splice(i, 1);
       }
 
-      // Обновляем искры
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const pt = particles[i];
-        pt.x += pt.vx;
-        pt.y += pt.vy;
-        pt.life -= 0.06;
-        if (pt.life <= 0) particles.splice(i, 1);
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.life -= 0.07;
+        if (s.life <= 0) sparks.splice(i, 1);
       }
 
-      // Запись истории сложности каждые 45 тиков
-      if (simTick % 45 === 0 && organisms.length > 0) {
-        let sumCells = 0;
-        let maxCells = 0;
+      if (tick % 40 === 0 && organisms.length > 0) {
+        let sum = 0, max = 0;
         for (let i = 0; i < organisms.length; i++) {
           const n = organisms[i].cells.length;
-          sumCells += n;
-          if (n > maxCells) maxCells = n;
+          sum += n;
+          if (n > max) max = n;
         }
-        complexityHistory.push({
-          avg: sumCells / organisms.length,
-          max: maxCells
-        });
-        if (complexityHistory.length > 90) complexityHistory.shift();
+        history.push({ avg: sum / organisms.length, max });
+        if (history.length > 85) history.shift();
       }
-    }
-
-    function spawnSpark(x, y, color) {
-      if (particles.length > 120) return;
-      particles.push({
-        x, y,
-        vx: (Math.random() - 0.5) * 2.4,
-        vy: (Math.random() - 0.5) * 2.4,
-        life: 1.0,
-        color
-      });
     }
 
     // =========================================================================
-    // 8. КАМЕРА И БИОЛЮМИНЕСЦЕНТНЫЙ РЕНДЕРИНГ ОКЕАНА
+    // 8. ОТРИСОВКА ОКЕАНА И КАМЕРА
     // =========================================================================
     const canvas = document.getElementById('worldCanvas');
     const ctx = canvas.getContext('2d');
 
-    const camera = {
+    const cam = {
       x: WORLD_W / 2,
       y: WORLD_H / 2,
       zoom: 0.65,
-      dragging: false,
-      lastX: 0,
-      lastY: 0
+      drag: false,
+      moved: false,
+      lx: 0,
+      ly: 0
     };
 
-    function resizeCanvas() {
+    function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      camera.zoom = Math.max(0.32, Math.min(1.2, window.innerWidth / (WORLD_W * 0.85)));
+      cam.zoom = Math.max(0.32, Math.min(1.15, window.innerWidth / (WORLD_W * 0.85)));
     }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function screenToWorld(sx, sy) {
-      return {
-        x: (sx - canvas.width / 2) / camera.zoom + camera.x,
-        y: (sy - canvas.height / 2) / camera.zoom + camera.y
-      };
-    }
+    window.addEventListener('resize', resize);
+    resize();
 
     canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
-      camera.dragging = true;
-      camera.dragMoved = false;
-      camera.lastX = e.clientX;
-      camera.lastY = e.clientY;
+      cam.drag = true;
+      cam.moved = false;
+      cam.lx = e.clientX;
+      cam.ly = e.clientY;
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (!camera.dragging) return;
-      const dx = e.clientX - camera.lastX;
-      const dy = e.clientY - camera.lastY;
+      if (!cam.drag) return;
+      const dx = e.clientX - cam.lx;
+      const dy = e.clientY - cam.ly;
       if (Math.hypot(dx, dy) > 4) {
-        camera.dragMoved = true;
-        followSelected = false;
+        cam.moved = true;
+        followMode = false;
         document.getElementById('btnFollow').classList.remove('active');
       }
-      camera.x -= dx / camera.zoom;
-      camera.y -= dy / camera.zoom;
-      camera.lastX = e.clientX;
-      camera.lastY = e.clientY;
+      cam.x -= dx / cam.zoom;
+      cam.y -= dy / cam.zoom;
+      cam.lx = e.clientX;
+      cam.ly = e.clientY;
     });
 
     window.addEventListener('mouseup', (e) => {
-      if (camera.dragging && !camera.dragMoved) {
-        const wp = screenToWorld(e.clientX, e.clientY);
-        pickOrganismAt(wp.x, wp.y);
+      if (cam.drag && !cam.moved) {
+        const wx = (e.clientX - canvas.width / 2) / cam.zoom + cam.x;
+        const wy = (e.clientY - canvas.height / 2) / cam.zoom + cam.y;
+        pickOrganism(wx, wy);
       }
-      camera.dragging = false;
+      cam.drag = false;
     });
 
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const factor = e.deltaY < 0 ? 1.12 : 0.89;
-      camera.zoom = Math.max(0.22, Math.min(2.8, camera.zoom * factor));
+      cam.zoom = Math.max(0.22, Math.min(2.6, cam.zoom * (e.deltaY < 0 ? 1.12 : 0.89)));
     }, { passive: false });
 
-    function pickOrganismAt(wx, wy) {
-      let best = null;
-      let bestDist = 48;
+    function pickOrganism(wx, wy) {
+      let best = null, bestD = 50;
       for (let i = 0; i < organisms.length; i++) {
-        const org = organisms[i];
-        for (let j = 0; j < org.cells.length; j++) {
-          const c = org.cells[j];
-          const d = Math.hypot(c.x - wx, c.y - wy);
-          if (d < bestDist) {
-            bestDist = d;
-            best = org;
+        const o = organisms[i];
+        for (let j = 0; j < o.cells.length; j++) {
+          const d = Math.hypot(o.cells[j].x - wx, o.cells[j].y - wy);
+          if (d < bestD) {
+            bestD = d;
+            best = o;
           }
         }
       }
       selectedOrg = best;
-      updateInspectorUI();
+      refreshInspector();
     }
 
-    function selectLargestOrganism() {
-      if (organisms.length === 0) return;
+    function findLargestOrganism() {
+      if (!organisms.length) return;
       let best = organisms[0];
       for (let i = 1; i < organisms.length; i++) {
-        if (organisms[i].cells.length > best.cells.length) {
-          best = organisms[i];
-        }
+        if (organisms[i].cells.length > best.cells.length) best = organisms[i];
       }
       selectedOrg = best;
-      updateInspectorUI();
+      refreshInspector();
     }
 
-    function renderWorld() {
-      if (followSelected && selectedOrg && !selectedOrg.dead) {
-        camera.x += (selectedOrg.cx - camera.x) * 0.12;
-        camera.y += (selectedOrg.cy - camera.y) * 0.12;
+    function drawOcean() {
+      if (followMode && selectedOrg && !selectedOrg.dead) {
+        cam.x += (selectedOrg.x - cam.x) * 0.14;
+        cam.y += (selectedOrg.y - cam.y) * 0.14;
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.scale(camera.zoom, camera.zoom);
-      ctx.translate(-camera.x, -camera.y);
+      ctx.scale(cam.zoom, cam.zoom);
+      ctx.translate(-cam.x, -cam.y);
 
-      // Глубоководный фон с фотозоной сверху
-      const grad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
-      grad.addColorStop(0, '#0a1e38');
-      grad.addColorStop(0.35, '#061224');
-      grad.addColorStop(1, '#02060d');
-      ctx.fillStyle = grad;
+      const bg = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+      bg.addColorStop(0, '#0a1f3b');
+      bg.addColorStop(0.4, '#061224');
+      bg.addColorStop(1, '#02060e');
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, WORLD_W, WORLD_H);
 
-      // Граница мира
       ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
       ctx.lineWidth = 3;
       ctx.strokeRect(0, 0, WORLD_W, WORLD_H);
 
-      // Детрит (органика)
-      ctx.fillStyle = 'rgba(134, 239, 172, 0.55)';
+      // Гранулы детрита
+      ctx.fillStyle = 'rgba(134, 239, 172, 0.58)';
       for (let i = 0; i < pellets.length; i++) {
         const p = pellets[i];
         ctx.beginPath();
@@ -1784,18 +1670,17 @@
         ctx.fill();
       }
 
-      // Отрисовка связей-пружин и триангуляционной сетки тканей
+      // Пружинные и триангуляционные связи
       ctx.lineWidth = 1.8;
       for (let i = 0; i < organisms.length; i++) {
-        const org = organisms[i];
-        for (let j = 0; j < org.links.length; j++) {
-          const l = org.links[j];
-          const a = org.cells[l.a];
-          const b = org.cells[l.b];
-          const pulseAlpha = Math.min(0.95, 0.25 + l.pulse * 0.55);
+        const o = organisms[i];
+        for (let j = 0; j < o.links.length; j++) {
+          const l = o.links[j];
+          const a = o.cells[l.a];
+          const b = o.cells[l.b];
           ctx.strokeStyle = l.triangulated
-            ? `rgba(56, 189, 248, ${pulseAlpha * 0.75})`
-            : `rgba(226, 232, 240, ${pulseAlpha})`;
+            ? `rgba(56, 189, 248, ${0.28 + l.pulse * 0.35})`
+            : `rgba(226, 232, 240, ${0.42 + l.pulse * 0.45})`;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -1803,214 +1688,182 @@
         }
       }
 
-      // Биолюминесцентные клетки
+      // Клетки организмов
       for (let i = 0; i < organisms.length; i++) {
-        const org = organisms[i];
-        for (let j = 0; j < org.cells.length; j++) {
-          const c = org.cells[j];
-          const spec = CELL_TYPES[c.type];
+        const o = organisms[i];
+        for (let j = 0; j < o.cells.length; j++) {
+          const c = o.cells[j];
+          const spec = CELL_SPECS[c.type];
 
-          // Мягкое свечение
           ctx.fillStyle = spec.glow;
           ctx.beginPath();
           ctx.arc(c.x, c.y, CELL_R * 1.55, 0, Math.PI * 2);
           ctx.fill();
 
-          // Ядро клетки
           ctx.fillStyle = spec.color;
           ctx.beginPath();
           ctx.arc(c.x, c.y, CELL_R, 0, Math.PI * 2);
           ctx.fill();
 
-          // Детали специализации (зрачок у сенсора, жгутик у миоцита, шип у фагоцита)
           if (c.type === 3) {
-            ctx.fillStyle = '#0f172a';
+            ctx.fillStyle = '#090d16';
             ctx.beginPath();
-            ctx.arc(
-              c.x + Math.cos(c.sensorTargetAngle) * 2.5,
-              c.y + Math.sin(c.sensorTargetAngle) * 2.5,
-              2.6, 0, Math.PI * 2
-            );
+            ctx.arc(c.x + Math.cos(c.eyeAngle) * 2.5, c.y + Math.sin(c.eyeAngle) * 2.5, 2.5, 0, Math.PI * 2);
             ctx.fill();
           } else if (c.type === 2) {
-            const tailDir = org.angle + c.localAngle + Math.PI;
-            const wave = Math.sin(org.age * 0.35 + c.phase) * 0.4;
+            const tailAng = o.heading + Math.PI + Math.sin(o.age * 0.4 + c.phase) * 0.42;
             ctx.strokeStyle = '#7dd3fc';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.1;
             ctx.beginPath();
             ctx.moveTo(c.x, c.y);
-            ctx.lineTo(
-              c.x + Math.cos(tailDir + wave) * (CELL_R * 1.9),
-              c.y + Math.sin(tailDir + wave) * (CELL_R * 1.9)
-            );
+            ctx.lineTo(c.x + Math.cos(tailAng) * (CELL_R * 2.0), c.y + Math.sin(tailAng) * (CELL_R * 2.0));
             ctx.stroke();
           }
         }
       }
 
-      // Подсветка выбранного существа
       if (selectedOrg && !selectedOrg.dead) {
-        const r = Math.max(24, Math.sqrt(selectedOrg.cells.length) * 14);
+        const rad = Math.max(24, Math.sqrt(selectedOrg.cells.length) * 14);
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2 / camera.zoom;
+        ctx.lineWidth = 2 / cam.zoom;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.arc(selectedOrg.cx, selectedOrg.cy, r, 0, Math.PI * 2);
+        ctx.arc(selectedOrg.x, selectedOrg.y, rad, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // Искры боев
-      for (let i = 0; i < particles.length; i++) {
-        const pt = particles[i];
-        ctx.fillStyle = pt.color;
-        ctx.globalAlpha = Math.max(0, pt.life);
+      for (let i = 0; i < sparks.length; i++) {
+        const s = sparks[i];
+        ctx.fillStyle = `rgba(244, 63, 94, ${s.life})`;
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, 2.6, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.globalAlpha = 1;
+
       ctx.restore();
     }
 
     // =========================================================================
-    // 9. ИНСПЕКТОР МОРФОГЕНЕЗА И ГРАФИК СЛОЖНОСТИ
+    // 9. ИНСПЕКТОР И ГРАФИКИ
     // =========================================================================
     const bpCanvas = document.getElementById('blueprintCanvas');
     const bpCtx = bpCanvas.getContext('2d');
-    const chartCanvas = document.getElementById('complexityChart');
+    const chartCanvas = document.getElementById('chartCanvas');
     const chartCtx = chartCanvas.getContext('2d');
 
-    function updateInspectorUI() {
-      const emptyEl = document.getElementById('inspectorEmpty');
-      const contentEl = document.getElementById('inspectorContent');
+    function refreshInspector() {
+      const empty = document.getElementById('inspEmpty');
+      const body = document.getElementById('inspBody');
 
       if (!selectedOrg || selectedOrg.dead) {
-        emptyEl.style.display = 'block';
-        contentEl.style.display = 'none';
+        empty.style.display = 'block';
+        body.style.display = 'none';
         return;
       }
 
-      emptyEl.style.display = 'none';
-      contentEl.style.display = 'flex';
+      empty.style.display = 'none';
+      body.style.display = 'flex';
 
       const grown = selectedOrg.cells.length;
-      const planned = selectedOrg.blueprint.length;
-      const pct = Math.round((grown / planned) * 100);
+      const total = selectedOrg.blueprint.length;
+      const pct = Math.round((grown / total) * 100);
 
-      document.getElementById('inspTitle').textContent = `Организм #${selectedOrg.id}`;
-      document.getElementById('inspGen').textContent = `Поколение ${selectedOrg.generation}`;
-      document.getElementById('inspOntoText').textContent = `${grown} из ${planned} клеток (${pct}%)`;
-      document.getElementById('inspOntoBar').style.width = `${pct}%`;
+      document.getElementById('uiOrgId').textContent = `Вид #${selectedOrg.id}`;
+      document.getElementById('uiOrgGen').textContent = `Пок. ${selectedOrg.generation}`;
+      document.getElementById('uiOntoTxt').textContent = `${grown} / ${total} (${pct}%)`;
+      document.getElementById('uiOntoFill').style.width = `${pct}%`;
 
-      const reproThreshold = laws.ontogenesis
-        ? ZYGOTE_SPAWN_COST + 55
-        : 100 + planned * 34;
+      document.getElementById('uiEnergy').textContent = `${selectedOrg.energy.toFixed(0)} / ${selectedOrg.reproThreshold().toFixed(0)}`;
+      document.getElementById('uiSpeed').textContent = `${selectedOrg.currentSpeed.toFixed(2)} (пар: ${selectedOrg.symFinPairs})`;
 
-      document.getElementById('inspEnergy').textContent = `${selectedOrg.energy.toFixed(0)} / ${reproThreshold}`;
-      document.getElementById('inspMass').textContent = `${selectedOrg.totalMass.toFixed(1)} / I=${selectedOrg.momentOfInertia.toFixed(0)}`;
+      const tri = selectedOrg.links.filter(l => l.triangulated).length;
+      document.getElementById('uiLinks').textContent = `${selectedOrg.links.length} (${tri} щит)`;
+      document.getElementById('uiKills').textContent = `${selectedOrg.kills}`;
+      document.getElementById('uiGeneCnt').textContent = selectedOrg.genome.length;
+      document.getElementById('uiCellCnt').textContent = total;
 
-      const triCount = selectedOrg.links.filter(l => l.triangulated).length;
-      document.getElementById('inspLinks').textContent = `${selectedOrg.links.length} (${triCount} трианг.)`;
-      document.getElementById('inspKills').textContent = `${selectedOrg.kills}`;
-      document.getElementById('inspGeneCount').textContent = selectedOrg.genome.length;
-      document.getElementById('inspBlueprintCount').textContent = planned;
-
-      // Список генов
-      const geneList = document.getElementById('geneList');
-      geneList.innerHTML = '';
+      const list = document.getElementById('geneList');
+      list.innerHTML = '';
       selectedOrg.genome.forEach((g, idx) => {
-        const spec = CELL_TYPES[g.type] || CELL_TYPES[0];
-        const row = document.createElement('div');
-        row.className = 'gene-row';
-        row.innerHTML = `
-          <div style="display:flex;align-items:center;gap:6px;">
+        const spec = CELL_SPECS[g.type] || CELL_SPECS[0];
+        const item = document.createElement('div');
+        item.className = 'gene-item';
+        item.innerHTML = `
+          <div style="display:flex;align-items:center;gap:5px;">
             <span class="dot" style="background:${spec.color}"></span>
             <span><b>#${idx}</b> ${spec.name}</span>
-            <span style="color:var(--text-muted);">(от #${Math.max(0, g.parent)})</span>
           </div>
           <div>
-            ${idx > 0 && g.sym === 1 && laws.symmetry ? '<span class="badge-sym">SYM ×2</span>' : `<span style="color:var(--text-muted);">${((g.angle * 180) / Math.PI).toFixed(0)}°</span>`}
+            ${idx > 0 && g.sym === 1 && config.symmetry ? '<span class="sym-tag">SYM ×2</span>' : `<span style="color:var(--text-muted);">${((g.angle * 180) / Math.PI).toFixed(0)}°</span>`}
           </div>
         `;
-        geneList.appendChild(row);
+        list.appendChild(item);
       });
 
-      drawBlueprintDiagram(selectedOrg);
+      drawBlueprint(selectedOrg);
     }
 
-    function drawBlueprintDiagram(org) {
+    function drawBlueprint(org) {
       bpCtx.clearRect(0, 0, bpCanvas.width, bpCanvas.height);
       const cx = bpCanvas.width / 2;
       const cy = bpCanvas.height / 2;
 
-      // Ось билатеральной симметрии
-      bpCtx.strokeStyle = 'rgba(148, 163, 184, 0.18)';
-      bpCtx.setLineDash([4, 4]);
+      bpCtx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+      bpCtx.setLineDash([3, 3]);
       bpCtx.beginPath();
-      bpCtx.moveTo(16, cy);
-      bpCtx.lineTo(bpCanvas.width - 16, cy);
+      bpCtx.moveTo(12, cy);
+      bpCtx.lineTo(bpCanvas.width - 12, cy);
       bpCtx.stroke();
       bpCtx.setLineDash([]);
 
-      // Авто-масштаб чертежа
-      let maxR = 25;
+      let maxR = 24;
       for (let i = 0; i < org.blueprint.length; i++) {
-        const b = org.blueprint[i];
-        maxR = Math.max(maxR, Math.hypot(b.lx, b.ly));
+        maxR = Math.max(maxR, Math.hypot(org.blueprint[i].lx, org.blueprint[i].ly));
       }
-      const scale = Math.min(1.45, 68 / (maxR + 12));
+      const sc = Math.min(1.35, 56 / (maxR + 10));
 
-      // Рисуем связи уже выросших клеток
       for (let i = 0; i < org.links.length; i++) {
         const l = org.links[i];
-        const ba = org.blueprint[l.a];
-        const bb = org.blueprint[l.b];
+        const a = org.blueprint[l.a];
+        const b = org.blueprint[l.b];
         bpCtx.strokeStyle = l.triangulated ? 'rgba(56, 189, 248, 0.75)' : 'rgba(226, 232, 240, 0.85)';
-        bpCtx.lineWidth = l.triangulated ? 1.3 : 2.0;
-        if (l.triangulated) bpCtx.setLineDash([3, 2]);
+        bpCtx.lineWidth = l.triangulated ? 1.2 : 1.8;
         bpCtx.beginPath();
-        bpCtx.moveTo(cx + ba.lx * scale, cy + ba.ly * scale);
-        bpCtx.lineTo(cx + bb.lx * scale, cy + bb.ly * scale);
+        bpCtx.moveTo(cx + a.lx * sc, cy + a.ly * sc);
+        bpCtx.lineTo(cx + b.lx * sc, cy + b.ly * sc);
         bpCtx.stroke();
-        bpCtx.setLineDash([]);
       }
 
-      // Рисуем все узлы чертежа (выросшие — яркие, еще растущие — пунктирные контуры)
       for (let i = 0; i < org.blueprint.length; i++) {
         const b = org.blueprint[i];
-        const spec = CELL_TYPES[b.type] || CELL_TYPES[0];
-        const x = cx + b.lx * scale;
-        const y = cy + b.ly * scale;
-        const isGrown = i < org.cells.length;
-
+        const spec = CELL_SPECS[b.type] || CELL_SPECS[0];
+        const x = cx + b.lx * sc;
+        const y = cy + b.ly * sc;
         bpCtx.beginPath();
-        bpCtx.arc(x, y, CELL_R * scale * 0.85, 0, Math.PI * 2);
-        if (isGrown) {
+        bpCtx.arc(x, y, CELL_R * sc * 0.85, 0, Math.PI * 2);
+        if (i < org.cells.length) {
           bpCtx.fillStyle = spec.color;
           bpCtx.fill();
         } else {
           bpCtx.strokeStyle = spec.color;
-          bpCtx.lineWidth = 1.5;
-          bpCtx.setLineDash([2, 2]);
+          bpCtx.lineWidth = 1.4;
           bpCtx.stroke();
-          bpCtx.setLineDash([]);
         }
       }
     }
 
-    function drawComplexityChart() {
+    function drawChart() {
       chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
-      if (complexityHistory.length < 2) return;
+      if (history.length < 2) return;
 
-      let maxVal = 12;
-      for (let i = 0; i < complexityHistory.length; i++) {
-        if (complexityHistory[i].max > maxVal) maxVal = complexityHistory[i].max;
+      let maxV = 12;
+      for (let i = 0; i < history.length; i++) {
+        if (history[i].max > maxV) maxV = history[i].max;
       }
-      maxVal += 2;
+      maxV += 2;
 
-      // Пунктирная линия старого "потолка 6 клеток" для наглядного ориентира
-      const y6 = chartCanvas.height - (6 / maxVal) * (chartCanvas.height - 14) - 6;
+      const y6 = chartCanvas.height - (6 / maxV) * (chartCanvas.height - 12) - 5;
       chartCtx.strokeStyle = 'rgba(244, 63, 94, 0.35)';
       chartCtx.setLineDash([3, 3]);
       chartCtx.beginPath();
@@ -2019,25 +1872,23 @@
       chartCtx.stroke();
       chartCtx.setLineDash([]);
 
-      // Линия максимального числа клеток
       chartCtx.strokeStyle = '#4ade80';
-      chartCtx.lineWidth = 1.8;
+      chartCtx.lineWidth = 1.7;
       chartCtx.beginPath();
-      for (let i = 0; i < complexityHistory.length; i++) {
-        const x = (i / (complexityHistory.length - 1)) * chartCanvas.width;
-        const y = chartCanvas.height - (complexityHistory[i].max / maxVal) * (chartCanvas.height - 14) - 6;
+      for (let i = 0; i < history.length; i++) {
+        const x = (i / (history.length - 1)) * chartCanvas.width;
+        const y = chartCanvas.height - (history[i].max / maxV) * (chartCanvas.height - 12) - 5;
         if (i === 0) chartCtx.moveTo(x, y);
         else chartCtx.lineTo(x, y);
       }
       chartCtx.stroke();
 
-      // Линия среднего размера тела
       chartCtx.strokeStyle = '#38bdf8';
-      chartCtx.lineWidth = 2.0;
+      chartCtx.lineWidth = 1.9;
       chartCtx.beginPath();
-      for (let i = 0; i < complexityHistory.length; i++) {
-        const x = (i / (complexityHistory.length - 1)) * chartCanvas.width;
-        const y = chartCanvas.height - (complexityHistory[i].avg / maxVal) * (chartCanvas.height - 14) - 6;
+      for (let i = 0; i < history.length; i++) {
+        const x = (i / (history.length - 1)) * chartCanvas.width;
+        const y = chartCanvas.height - (history[i].avg / maxV) * (chartCanvas.height - 12) - 5;
         if (i === 0) chartCtx.moveTo(x, y);
         else chartCtx.lineTo(x, y);
       }
@@ -2045,137 +1896,150 @@
     }
 
     // =========================================================================
-    // 10. СОБЫТИЯ ИНТЕРФЕЙСА И ГЛАВНЫЙ ЦИКЛ
+    // 10. УПРАВЛЕНИЕ СКРЫВАЕМЫМИ ПАНЕЛЯМИ И СОБЫТИЯМИ
     // =========================================================================
-    document.getElementById('btnPlayPause').addEventListener('click', (e) => {
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+    const bottomBar = document.getElementById('bottomBar');
+    const btnToggleLeft = document.getElementById('btnToggleLeft');
+    const btnToggleRight = document.getElementById('btnToggleRight');
+
+    function toggleLeft(forceState) {
+      const hide = typeof forceState === 'boolean' ? !forceState : !leftPanel.classList.contains('collapsed');
+      leftPanel.classList.toggle('collapsed', hide);
+      btnToggleLeft.classList.toggle('active', !hide);
+    }
+
+    function toggleRight(forceState) {
+      const hide = typeof forceState === 'boolean' ? !forceState : !rightPanel.classList.contains('collapsed');
+      rightPanel.classList.toggle('collapsed', hide);
+      btnToggleRight.classList.toggle('active', !hide);
+    }
+
+    function toggleCleanScreen() {
+      const anyVisible = !leftPanel.classList.contains('collapsed') || !rightPanel.classList.contains('collapsed');
+      toggleLeft(!anyVisible);
+      toggleRight(!anyVisible);
+      bottomBar.style.display = anyVisible ? 'none' : 'flex';
+    }
+
+    btnToggleLeft.addEventListener('click', () => toggleLeft());
+    document.getElementById('btnCloseLeft').addEventListener('click', () => toggleLeft(false));
+    btnToggleRight.addEventListener('click', () => toggleRight());
+    document.getElementById('btnCloseRight').addEventListener('click', () => toggleRight(false));
+    document.getElementById('btnCleanUI').addEventListener('click', toggleCleanScreen);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+      if (e.key.toLowerCase() === 'h' || e.key.toLowerCase() === 'р') {
+        toggleCleanScreen();
+      }
+    });
+
+    document.getElementById('btnPlay').addEventListener('click', (e) => {
       paused = !paused;
       e.currentTarget.textContent = paused ? '▶ Старт' : '⏸ Пауза';
       e.currentTarget.classList.toggle('active', !paused);
     });
 
-    document.querySelectorAll('[data-warp]').forEach(btn => {
+    document.querySelectorAll('.warp-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-warp]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.warp-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        warpFactor = parseInt(btn.getAttribute('data-warp'), 10);
+        warp = parseInt(btn.getAttribute('data-warp'), 10);
       });
     });
 
     document.getElementById('btnReset').addEventListener('click', () => {
-      initWorld(document.getElementById('presetSelect').value);
+      resetWorld(document.getElementById('scenarioSelect').value);
     });
 
-    document.getElementById('presetSelect').addEventListener('change', (e) => {
-      initWorld(e.target.value);
+    document.getElementById('scenarioSelect').addEventListener('change', (e) => {
+      resetWorld(e.target.value);
     });
 
-    // Тумблеры 4 честных законов физики
-    document.getElementById('lawOntogenesis').addEventListener('change', (e) => { laws.ontogenesis = e.target.checked; });
-    document.getElementById('lawTriangulation').addEventListener('change', (e) => { laws.triangulation = e.target.checked; });
-    document.getElementById('lawSymmetry').addEventListener('change', (e) => { laws.symmetry = e.target.checked; });
-    document.getElementById('lawTorque').addEventListener('change', (e) => { laws.torque = e.target.checked; });
+    document.getElementById('chkKleiber').addEventListener('change', e => { config.kleiber = e.target.checked; });
+    document.getElementById('chkTriangulation').addEventListener('change', e => { config.triangulation = e.target.checked; });
+    document.getElementById('chkSymmetry').addEventListener('change', e => { config.symmetry = e.target.checked; });
+    document.getElementById('chkMomentum').addEventListener('change', e => { config.momentum = e.target.checked; });
 
-    document.getElementById('sliderSun').addEventListener('input', (e) => {
-      laws.sunMultiplier = parseFloat(e.target.value);
-      document.getElementById('valSun').textContent = `${laws.sunMultiplier.toFixed(2)}x`;
+    document.getElementById('rngSun').addEventListener('input', e => {
+      config.sunMult = parseFloat(e.target.value);
+      document.getElementById('lblSun').textContent = `${config.sunMult.toFixed(2)}x`;
     });
 
-    document.getElementById('sliderDup').addEventListener('input', (e) => {
-      laws.duplicationRate = parseInt(e.target.value, 10) / 100;
-      document.getElementById('valDup').textContent = `${e.target.value}%`;
+    document.getElementById('rngMut').addEventListener('input', e => {
+      config.dupChance = parseInt(e.target.value, 10) / 100;
+      document.getElementById('lblMut').textContent = `${e.target.value}%`;
     });
 
-    document.getElementById('btnBestOrg').addEventListener('click', () => {
-      selectLargestOrganism();
+    document.getElementById('btnFindGiant').addEventListener('click', () => {
+      findLargestOrganism();
       if (selectedOrg) {
-        followSelected = true;
+        followMode = true;
         document.getElementById('btnFollow').classList.add('active');
       }
     });
 
-    document.getElementById('btnFollow').addEventListener('click', (e) => {
-      followSelected = !followSelected;
-      e.currentTarget.classList.toggle('active', followSelected);
+    document.getElementById('btnFollow').addEventListener('click', e => {
+      followMode = !followMode;
+      e.currentTarget.classList.toggle('active', followMode);
     });
 
     document.getElementById('btnClone').addEventListener('click', () => {
       if (!selectedOrg || selectedOrg.dead) return;
-      const clone = new Organism(
-        selectedOrg.cx + 35,
-        selectedOrg.cy + 35,
-        selectedOrg.angle,
-        selectedOrg.genome,
-        selectedOrg.generation,
-        120,
-        true
-      );
-      organisms.push(clone);
-      selectedOrg = clone;
-      updateInspectorUI();
+      const c = new Organism(selectedOrg.x + 35, selectedOrg.y + 35, selectedOrg.heading, selectedOrg.genome, selectedOrg.generation, 140, true);
+      organisms.push(c);
+      selectedOrg = c;
+      refreshInspector();
     });
 
-    document.getElementById('btnAddGene').addEventListener('click', () => {
+    document.getElementById('btnMutatePlus').addEventListener('click', () => {
       if (!selectedOrg || selectedOrg.dead) return;
       const g = selectedOrg.genome.map(x => ({ ...x }));
       g.push({
-        type: (Math.random() * CELL_TYPES.length) | 0,
+        type: (Math.random() * CELL_SPECS.length) | 0,
         parent: (Math.random() * g.length) | 0,
-        angle: (Math.random() * 1.6 + 0.4) * (Math.random() < 0.5 ? 1 : -1),
-        sym: laws.symmetry ? 1 : 0
+        angle: (Math.random() * 1.6 + 0.45) * (Math.random() < 0.5 ? 1 : -1),
+        sym: config.symmetry ? 1 : 0
       });
-      const mutant = new Organism(
-        selectedOrg.cx + 40,
-        selectedOrg.cy,
-        selectedOrg.angle,
-        g,
-        selectedOrg.generation + 1,
-        140,
-        true
-      );
-      organisms.push(mutant);
-      selectedOrg = mutant;
-      updateInspectorUI();
+      const m = new Organism(selectedOrg.x + 40, selectedOrg.y, selectedOrg.heading, g, selectedOrg.generation + 1, 160, true);
+      organisms.push(m);
+      selectedOrg = m;
+      refreshInspector();
     });
 
-    // Модальное окно JSON ДНК
+    // Модальное окно ДНК
     const dnaModal = document.getElementById('dnaModal');
-    const dnaTextarea = document.getElementById('dnaTextarea');
+    const dnaInput = document.getElementById('dnaInput');
 
-    document.getElementById('btnDnaModal').addEventListener('click', () => {
-      if (selectedOrg) {
-        dnaTextarea.value = JSON.stringify(selectedOrg.genome, null, 2);
-      }
+    document.getElementById('btnOpenJson').addEventListener('click', () => {
+      if (selectedOrg) dnaInput.value = JSON.stringify(selectedOrg.genome, null, 2);
       dnaModal.classList.add('open');
     });
-
-    document.getElementById('btnCloseModal').addEventListener('click', () => {
-      dnaModal.classList.remove('open');
+    document.getElementById('btnCloseModal').addEventListener('click', () => dnaModal.classList.remove('open'));
+    document.getElementById('btnCopyJson').addEventListener('click', () => {
+      dnaInput.select();
+      navigator.clipboard.writeText(dnaInput.value);
     });
-
-    document.getElementById('btnCopyDna').addEventListener('click', () => {
-      dnaTextarea.select();
-      navigator.clipboard.writeText(dnaTextarea.value);
-    });
-
-    document.getElementById('btnSpawnDna').addEventListener('click', () => {
+    document.getElementById('btnSpawnJson').addEventListener('click', () => {
       try {
-        const parsed = JSON.parse(dnaTextarea.value);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const customOrg = new Organism(camera.x, camera.y, 0, parsed, 1, 130, true);
-          organisms.push(customOrg);
-          selectedOrg = customOrg;
-          updateInspectorUI();
+        const arr = JSON.parse(dnaInput.value);
+        if (Array.isArray(arr) && arr.length > 0) {
+          const o = new Organism(cam.x, cam.y, 0, arr, 1, 160, true);
+          organisms.push(o);
+          selectedOrg = o;
+          refreshInspector();
           dnaModal.classList.remove('open');
         }
       } catch (err) {
-        alert('Ошибка формата JSON ДНК: ' + err.message);
+        alert('Ошибка JSON: ' + err.message);
       }
     });
 
-    // Кнопка скачивания готового index.html
     document.getElementById('btnDownload').addEventListener('click', () => {
-      const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -2184,46 +2048,39 @@
       URL.revokeObjectURL(url);
     });
 
-    // Обновление телеметрии в шапке
-    function updateHUD() {
-      let totalCells = 0;
-      let maxCells = 0;
-      let maxGen = 1;
+    function updateTelemetry() {
+      let cells = 0, maxC = 0, maxG = 1;
       for (let i = 0; i < organisms.length; i++) {
         const o = organisms[i];
-        const n = o.cells.length;
-        totalCells += n;
-        if (n > maxCells) maxCells = n;
-        if (o.generation > maxGen) maxGen = o.generation;
+        cells += o.cells.length;
+        if (o.cells.length > maxC) maxC = o.cells.length;
+        if (o.generation > maxG) maxG = o.generation;
       }
-      const avg = organisms.length ? (totalCells / organisms.length).toFixed(1) : '0.0';
+      const avg = organisms.length ? (cells / organisms.length).toFixed(1) : '0.0';
+      document.getElementById('stOrgs').textContent = organisms.length;
+      document.getElementById('stCells').textContent = cells;
+      document.getElementById('stComplex').textContent = `${avg} / ${maxC}`;
+      document.getElementById('stGen').textContent = maxG;
 
-      document.getElementById('statOrgs').textContent = organisms.length;
-      document.getElementById('statCells').textContent = totalCells;
-      document.getElementById('statComplexity').textContent = `${avg} / ${maxCells}`;
-      document.getElementById('statGen').textContent = maxGen;
-
-      const seasonVal = Math.round((0.72 + 0.28 * Math.sin(simTick * 0.0008)) * 100);
-      document.getElementById('statSeason').textContent = `${seasonVal > 85 ? '☀️ Лето' : seasonVal < 60 ? '❄️ Зима' : '🌊 Осень'} ${seasonVal}%`;
+      const sPct = Math.round((0.75 + 0.25 * Math.sin(tick * 0.0009)) * 100);
+      document.getElementById('stSeason').textContent = `${sPct > 82 ? '☀️' : '🌊'} ${sPct}%`;
     }
 
-    function mainLoop() {
+    function loop() {
       if (!paused) {
-        for (let w = 0; w < warpFactor; w++) {
-          stepSimulation();
-        }
+        for (let w = 0; w < warp; w++) stepWorld();
       }
-      renderWorld();
-      if (simTick % 12 === 0) {
-        updateHUD();
-        drawComplexityChart();
-        if (selectedOrg) updateInspectorUI();
+      drawOcean();
+      if (tick % 10 === 0) {
+        updateTelemetry();
+        drawChart();
+        if (selectedOrg) refreshInspector();
       }
-      requestAnimationFrame(mainLoop);
+      requestAnimationFrame(loop);
     }
 
-    initWorld('cambrian');
-    requestAnimationFrame(mainLoop);
+    resetWorld('cambrian');
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
